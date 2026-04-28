@@ -1,3 +1,5 @@
 export { useTransactionsStore } from './transactions'
 export { useBudgetsStore } from './budgets'
 export { useGoalsStore } from './goals'
+export { useAccountsStore } from './accounts'
+export { useInvestmentsStore } from './investments'

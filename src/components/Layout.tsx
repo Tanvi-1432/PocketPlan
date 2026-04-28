@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 
-type Page = 'dashboard' | 'transactions' | 'budgets' | 'goals'
+type Page = 'dashboard' | 'transactions' | 'budgets' | 'goals' | 'accounts' | 'investments'
 
 interface NavItem {
   id: Page
@@ -10,10 +10,12 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { id: 'dashboard', label: 'Dashboard', icon: '▦' },
+  { id: 'dashboard',    label: 'Dashboard',    icon: '▦' },
   { id: 'transactions', label: 'Transactions', icon: '↕' },
-  { id: 'budgets', label: 'Budgets', icon: '◎' },
-  { id: 'goals', label: 'Goals', icon: '◈' },
+  { id: 'budgets',      label: 'Budgets',      icon: '◎' },
+  { id: 'goals',        label: 'Goals',        icon: '◈' },
+  { id: 'accounts',     label: 'Accounts',     icon: '🏦' },
+  { id: 'investments',  label: 'Investments',  icon: '📈' },
 ]
 
 interface LayoutProps {
@@ -48,6 +50,9 @@ export default function Layout({ currentPage, onNavigate, children }: LayoutProp
             </button>
           ))}
         </nav>
+        <div className="px-4 py-3 border-t border-gray-100">
+          <p className="text-xs text-gray-400 text-center">Demo Mode · Simulated data only</p>
+        </div>
       </aside>
 
       {/* Mobile header */}

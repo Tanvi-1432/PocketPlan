@@ -4,6 +4,8 @@ import Dashboard from './pages/Dashboard'
 import Transactions from './pages/Transactions'
 import Budgets from './pages/Budgets'
 import Goals from './pages/Goals'
+import Accounts from './pages/Accounts'
+import Investments from './pages/Investments'
 import './index.css'
 
 export default function App() {
@@ -15,6 +17,8 @@ export default function App() {
       case 'transactions': return <Transactions />
       case 'budgets':      return <Budgets />
       case 'goals':        return <Goals />
+      case 'accounts':     return <Accounts />
+      case 'investments':  return <Investments />
     }
   }
 
