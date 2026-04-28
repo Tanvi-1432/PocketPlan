@@ -155,3 +155,48 @@ export function buildDemoBudgets(): Budget[] {
     { id: uuidv4(), category: 'Healthcare',    limit: 50,   month },
   ]
 }
+
+// Manual demo data — no bank sync required
+export function buildManualDemoTransactions(): Transaction[] {
+  return [
+    { id: uuidv4(), title: 'Monthly Salary',       amount: 4500.00, type: 'income',  category: 'Salary',        date: daysAgo(1),  source: 'manual' },
+    { id: uuidv4(), title: 'Freelance Project',    amount: 850.00,  type: 'income',  category: 'Freelance',     date: daysAgo(5),  source: 'manual' },
+    { id: uuidv4(), title: 'Dividend Income',      amount: 42.50,   type: 'income',  category: 'Investment',    date: daysAgo(10), source: 'manual' },
+    { id: uuidv4(), title: 'Rent',                 amount: 1400.00, type: 'expense', category: 'Housing',       date: daysAgo(2),  source: 'manual' },
+    { id: uuidv4(), title: 'Grocery Shopping',     amount: 112.40,  type: 'expense', category: 'Food',          date: daysAgo(3),  source: 'manual' },
+    { id: uuidv4(), title: 'Restaurant Dinner',    amount: 58.00,   type: 'expense', category: 'Food',          date: daysAgo(6),  source: 'manual' },
+    { id: uuidv4(), title: 'Gas',                  amount: 48.00,   type: 'expense', category: 'Transport',     date: daysAgo(4),  source: 'manual' },
+    { id: uuidv4(), title: 'Spotify',              amount: 10.99,   type: 'expense', category: 'Entertainment', date: daysAgo(7),  source: 'manual' },
+    { id: uuidv4(), title: 'Netflix',              amount: 15.49,   type: 'expense', category: 'Entertainment', date: daysAgo(8),  source: 'manual' },
+    { id: uuidv4(), title: 'Amazon Order',         amount: 34.99,   type: 'expense', category: 'Shopping',      date: daysAgo(5),  source: 'manual' },
+    { id: uuidv4(), title: 'Gym Membership',       amount: 29.99,   type: 'expense', category: 'Healthcare',    date: daysAgo(12), source: 'manual' },
+    { id: uuidv4(), title: 'Phone Bill',           amount: 80.00,   type: 'expense', category: 'Other',         date: daysAgo(9),  source: 'manual' },
+    { id: uuidv4(), title: 'Coffee Shop',          amount: 18.50,   type: 'expense', category: 'Food',          date: daysAgo(1),  source: 'manual' },
+    { id: uuidv4(), title: 'Online Course',        amount: 49.00,   type: 'expense', category: 'Education',     date: daysAgo(14), source: 'manual' },
+  ]
+}
+
+import type { SavingsGoal } from '../types'
+
+export function buildManualDemoGoals(): Omit<SavingsGoal, 'id'>[] {
+  return [
+    {
+      name: 'Emergency Fund',
+      targetAmount: 10000,
+      currentAmount: 3200,
+      deadline: (() => { const d = new Date(); d.setMonth(d.getMonth() + 8); return d.toISOString().slice(0, 10) })(),
+    },
+    {
+      name: 'Vacation — Japan',
+      targetAmount: 3500,
+      currentAmount: 1100,
+      deadline: (() => { const d = new Date(); d.setMonth(d.getMonth() + 5); return d.toISOString().slice(0, 10) })(),
+    },
+    {
+      name: 'New Laptop',
+      targetAmount: 1800,
+      currentAmount: 900,
+      deadline: (() => { const d = new Date(); d.setMonth(d.getMonth() + 3); return d.toISOString().slice(0, 10) })(),
+    },
+  ]
+}

@@ -7,24 +7,58 @@ interface SummaryCardProps {
 }
 
 const VARIANT_STYLES = {
-  income:  { bg: 'bg-emerald-50', text: 'text-emerald-700', label: 'text-emerald-600', icon: '↑' },
-  expense: { bg: 'bg-red-50',     text: 'text-red-700',     label: 'text-red-600',     icon: '↓' },
-  balance: { bg: 'bg-indigo-50',  text: 'text-indigo-700',  label: 'text-indigo-600',  icon: '◈' },
+  income: {
+    bg: 'bg-white border border-gray-200',
+    amount: 'text-emerald-600',
+    label: 'text-gray-500',
+    iconBg: 'bg-emerald-100',
+    iconText: 'text-emerald-600',
+    icon: (
+      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 19V5M5 12l7-7 7 7" />
+      </svg>
+    ),
+  },
+  expense: {
+    bg: 'bg-white border border-gray-200',
+    amount: 'text-red-600',
+    label: 'text-gray-500',
+    iconBg: 'bg-red-100',
+    iconText: 'text-red-600',
+    icon: (
+      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 5v14M19 12l-7 7-7-7" />
+      </svg>
+    ),
+  },
+  balance: {
+    bg: 'bg-indigo-600 border border-indigo-600',
+    amount: 'text-white',
+    label: 'text-indigo-200',
+    iconBg: 'bg-indigo-500',
+    iconText: 'text-white',
+    icon: (
+      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 2a10 10 0 100 20A10 10 0 0012 2zm0 6v4l3 3" />
+      </svg>
+    ),
+  },
 }
 
 export default function SummaryCard({ label, amount, variant }: SummaryCardProps) {
   const s = VARIANT_STYLES[variant]
-  const displayAmount = variant === 'balance' && amount < 0
-    ? `-${formatCurrency(Math.abs(amount))}`
-    : formatCurrency(amount)
+  const isNegative = amount < 0
+  const displayAmount = isNegative ? `-${formatCurrency(Math.abs(amount))}` : formatCurrency(amount)
 
   return (
-    <div className={`${s.bg} rounded-xl px-5 py-4 flex items-center gap-4`}>
-      <span className={`text-2xl ${s.text}`}>{s.icon}</span>
-      <div>
-        <p className={`text-xs font-medium uppercase tracking-wide ${s.label}`}>{label}</p>
-        <p className={`text-xl font-bold mt-0.5 ${s.text}`}>{displayAmount}</p>
+    <div className={`${s.bg} rounded-xl px-5 py-5 shadow-sm`}>
+      <div className="flex items-center justify-between mb-3">
+        <p className={`text-xs font-semibold uppercase tracking-wider ${s.label}`}>{label}</p>
+        <div className={`${s.iconBg} ${s.iconText} w-7 h-7 rounded-lg flex items-center justify-center`}>
+          {s.icon}
+        </div>
       </div>
+      <p className={`text-2xl font-bold tracking-tight ${s.amount}`}>{displayAmount}</p>
     </div>
   )
 }
