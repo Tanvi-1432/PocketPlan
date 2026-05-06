@@ -51,14 +51,14 @@ export default function SummaryCard({ label, amount, variant }: SummaryCardProps
   const displayAmount = isNegative ? `-${formatCurrency(Math.abs(amount))}` : formatCurrency(amount)
 
   return (
-    <div className={`${s.bg} rounded-xl px-5 py-5 shadow-sm`}>
-      <div className="flex items-center justify-between mb-3">
-        <p className={`text-xs font-semibold uppercase tracking-wider ${s.label}`}>{label}</p>
-        <div className={`${s.iconBg} ${s.iconText} w-7 h-7 rounded-lg flex items-center justify-center`}>
+    <div className={`${s.bg} rounded-xl px-3 py-3 sm:px-5 sm:py-5 shadow-sm hover:shadow-md transition-shadow duration-200`}>
+      <div className="flex items-center justify-between mb-2 sm:mb-3">
+        <p className={`text-[10px] sm:text-xs font-semibold uppercase tracking-wider ${s.label}`}>{label}</p>
+        <div className={`${s.iconBg} ${s.iconText} w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center`}>
           {s.icon}
         </div>
       </div>
-      <p className={`text-2xl font-bold tracking-tight ${s.amount}`}>{displayAmount}</p>
+      <p className={`text-lg sm:text-2xl font-bold tracking-tight ${s.amount} truncate`}>{displayAmount}</p>
     </div>
   )
 }

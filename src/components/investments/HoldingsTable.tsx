@@ -20,7 +20,7 @@ export default function HoldingsTable({ holdings }: HoldingsTableProps) {
     <Card>
       <CardHeader title="Holdings" />
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm min-w-[480px]">
           <thead>
             <tr className="border-b border-gray-100 text-left">
               <th className="px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Symbol</th>
@@ -28,25 +28,35 @@ export default function HoldingsTable({ holdings }: HoldingsTableProps) {
               <th className="px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide text-right">Qty</th>
               <th className="px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide text-right">Price</th>
               <th className="px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide text-right">Value</th>
-              <th className="px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide text-right">Gain/Loss</th>
+              <th className="px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide text-right">Gain / Loss</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {holdings.map((h) => (
-              <tr key={h.id} className="hover:bg-gray-50 transition-colors">
-                <td className="px-5 py-3 font-semibold text-gray-900">{h.symbol}</td>
-                <td className="px-5 py-3 text-gray-500 hidden sm:table-cell truncate max-w-[180px]">{h.name}</td>
-                <td className="px-5 py-3 text-right text-gray-700">{h.quantity}</td>
-                <td className="px-5 py-3 text-right text-gray-700">{formatCurrency(h.currentPrice)}</td>
-                <td className="px-5 py-3 text-right font-medium text-gray-900">{formatCurrency(h.marketValue)}</td>
-                <td className="px-5 py-3 text-right">
-                  <span className={h.gainLoss >= 0 ? 'text-emerald-600' : 'text-red-600'}>
-                    {h.gainLoss >= 0 ? '+' : ''}{formatCurrency(h.gainLoss)}
-                    <span className="text-xs ml-1">({h.gainLoss >= 0 ? '+' : ''}{h.gainLossPercent.toFixed(2)}%)</span>
-                  </span>
-                </td>
-              </tr>
-            ))}
+            {holdings.map((h) => {
+              const isPositive = h.gainLoss >= 0
+              const gainClass = isPositive ? 'text-emerald-600' : 'text-red-500'
+              return (
+                <tr key={h.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-5 py-3">
+                    <span className="font-semibold text-gray-900">{h.symbol}</span>
+                  </td>
+                  <td className="px-5 py-3 text-gray-500 hidden sm:table-cell truncate max-w-[160px]">{h.name}</td>
+                  <td className="px-5 py-3 text-right text-gray-600 tabular-nums">{h.quantity}</td>
+                  <td className="px-5 py-3 text-right text-gray-600 tabular-nums">{formatCurrency(h.currentPrice)}</td>
+                  <td className="px-5 py-3 text-right font-semibold text-gray-900 tabular-nums">{formatCurrency(h.marketValue)}</td>
+                  <td className="px-5 py-3 text-right tabular-nums">
+                    <div className={`flex flex-col items-end ${gainClass}`}>
+                      <span className="font-semibold">
+                        {isPositive ? '+' : ''}{formatCurrency(h.gainLoss)}
+                      </span>
+                      <span className="text-xs opacity-80">
+                        {isPositive ? '+' : ''}{h.gainLossPercent.toFixed(2)}%
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              )
+            })}
           </tbody>
         </table>
       </div>

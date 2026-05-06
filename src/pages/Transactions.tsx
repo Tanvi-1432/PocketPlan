@@ -42,11 +42,17 @@ export default function Transactions() {
       </div>
 
       {transactions.length === 0 ? (
-        <div className="text-center py-24 text-gray-400">
-          <p className="text-5xl mb-4">💸</p>
-          <p className="text-base font-medium text-gray-500">No transactions yet</p>
-          <p className="text-sm text-gray-400 mt-1 mb-6">Add your first income or expense to get started</p>
-          <Button onClick={openAdd}>+ Add transaction</Button>
+        <div className="flex flex-col items-center justify-center py-24 text-center">
+          <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mb-4">
+            <svg className="w-8 h-8 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4" />
+            </svg>
+          </div>
+          <p className="text-base font-semibold text-gray-700">No transactions yet</p>
+          <p className="text-sm text-gray-400 mt-1 max-w-xs mb-6">
+            Add your first income or expense to start tracking your cash flow.
+          </p>
+          <Button onClick={openAdd}>Add transaction</Button>
         </div>
       ) : (
         <TransactionList

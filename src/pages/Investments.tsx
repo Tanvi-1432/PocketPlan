@@ -42,12 +42,17 @@ export default function Investments() {
 
       {/* Empty state */}
       {holdings.length === 0 && (
-        <div className="text-center py-24 text-gray-400">
-          <p className="text-5xl mb-4">📈</p>
-          <p className="text-base font-medium text-gray-500">No investment data</p>
-          <p className="text-sm text-gray-400 mt-1 mb-6">
-            Go to Accounts and click "Simulate Account Sync" to load demo holdings
+        <div className="flex flex-col items-center justify-center py-24 text-center">
+          <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mb-4">
+            <svg className="w-8 h-8 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 17l4-8 4 4 4-6 4 3" />
+            </svg>
+          </div>
+          <p className="text-base font-semibold text-gray-700">No portfolio data</p>
+          <p className="text-sm text-gray-400 mt-1 max-w-xs mb-6">
+            Sync your accounts to load demo investment holdings and track your portfolio.
           </p>
+          <SyncButton />
         </div>
       )}
 

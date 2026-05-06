@@ -2,7 +2,7 @@
 
 A full-featured personal budgeting web app built as a portfolio project. PocketPlan helps you track income and expenses, manage monthly budgets, set savings goals, and visualize your finances — all in the browser with no backend required.
 
-> **Live Demo:** _[Deploy to Vercel and add link here]_
+> **Live Demo:** _[https://pocket-plan-plum.vercel.app]_
 >
 > **Screenshots:** _[Add screenshots after deployment]_
 

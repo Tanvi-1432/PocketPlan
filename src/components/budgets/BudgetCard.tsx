@@ -14,7 +14,7 @@ export default function BudgetCard({ item, onEdit, onDelete }: BudgetCardProps) 
   const color = CATEGORY_COLORS[budget.category]
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-2.5">

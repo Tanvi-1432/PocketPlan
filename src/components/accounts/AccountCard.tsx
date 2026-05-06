@@ -3,6 +3,7 @@ import { formatCurrency } from '../../utils'
 
 interface AccountCardProps {
   account: ConnectedAccount
+  transactionCount?: number
 }
 
 const INSTITUTION_COLORS: Record<string, string> = {
@@ -23,14 +24,14 @@ function formatLastSynced(iso: string | null): string {
   return `Synced ${new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`
 }
 
-export default function AccountCard({ account }: AccountCardProps) {
+export default function AccountCard({ account, transactionCount }: AccountCardProps) {
   const { institutionName, accountName, accountType, balance, status, lastSynced } = account
   const badge = STATUS_BADGE[status]
   const avatarColor = INSTITUTION_COLORS[institutionName] ?? 'bg-gray-500'
   const isCredit = accountType === 'Credit Card'
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
           <div className={`${avatarColor} w-9 h-9 rounded-lg flex items-center justify-center shrink-0`}>
@@ -55,7 +56,14 @@ export default function AccountCard({ account }: AccountCardProps) {
             {isCredit && balance < 0 ? `-${formatCurrency(Math.abs(balance))}` : formatCurrency(balance)}
           </p>
         </div>
-        <p className="text-xs text-gray-400">{formatLastSynced(lastSynced)}</p>
+        <div className="text-right">
+          <p className="text-xs text-gray-400">{formatLastSynced(lastSynced)}</p>
+          {transactionCount !== undefined && (
+            <p className="text-xs text-gray-400 mt-0.5">
+              {transactionCount} synced transaction{transactionCount !== 1 ? 's' : ''}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   )

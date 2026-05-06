@@ -24,7 +24,7 @@ export default function GoalCard({ goal, onEdit, onDelete, onContribute }: GoalC
   const isOverdue = days < 0 && !isComplete
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 flex flex-col gap-4">
+    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 flex flex-col gap-4 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0 pr-2">

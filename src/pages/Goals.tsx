@@ -60,13 +60,17 @@ export default function Goals() {
 
       {/* Empty state */}
       {goals.length === 0 && (
-        <div className="text-center py-24 text-gray-400">
-          <p className="text-5xl mb-4">◈</p>
-          <p className="text-base font-medium text-gray-500">No savings goals yet</p>
-          <p className="text-sm text-gray-400 mt-1 mb-6">
-            Create a goal and track your progress over time
+        <div className="flex flex-col items-center justify-center py-24 text-center">
+          <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mb-4">
+            <svg className="w-8 h-8 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+            </svg>
+          </div>
+          <p className="text-base font-semibold text-gray-700">No savings goals yet</p>
+          <p className="text-sm text-gray-400 mt-1 max-w-xs mb-6">
+            Start your first goal to track progress toward something important.
           </p>
-          <Button onClick={openAdd}>+ New goal</Button>
+          <Button onClick={openAdd}>Create a goal</Button>
         </div>
       )}
 

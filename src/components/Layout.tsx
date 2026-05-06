@@ -35,11 +35,16 @@ interface LayoutProps {
 export default function Layout({ currentPage, onNavigate, children }: LayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
+  function navigate(page: Page) {
+    onNavigate(page)
+    setMobileMenuOpen(false)
+  }
+
   const navButtonClass = (id: Page) =>
-    `w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+    `w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
       currentPage === id
         ? 'bg-indigo-50 text-indigo-700'
-        : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'
+        : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900 active:scale-95'
     }`
 
   return (
@@ -53,7 +58,7 @@ export default function Layout({ currentPage, onNavigate, children }: LayoutProp
 
         <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
           {NAV_ITEMS.map((item) => (
-            <button key={item.id} onClick={() => onNavigate(item.id)} className={navButtonClass(item.id)}>
+            <button key={item.id} onClick={() => navigate(item.id)} className={navButtonClass(item.id)}>
               {item.icon}
               {item.label}
             </button>
@@ -73,7 +78,7 @@ export default function Layout({ currentPage, onNavigate, children }: LayoutProp
         <span className="text-lg font-bold text-indigo-600">PocketPlan</span>
         <button
           onClick={() => setMobileMenuOpen((o) => !o)}
-          className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+          className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 active:scale-95 transition-all duration-150"
           aria-label="Toggle menu"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -84,25 +89,44 @@ export default function Layout({ currentPage, onNavigate, children }: LayoutProp
         </button>
       </div>
 
-      {/* Mobile dropdown */}
+      {/* Mobile overlay backdrop */}
       {mobileMenuOpen && (
-        <div className="md:hidden fixed top-14 inset-x-0 z-10 bg-white border-b border-gray-200 px-3 py-2 space-y-0.5 shadow-lg">
-          {NAV_ITEMS.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => { onNavigate(item.id); setMobileMenuOpen(false) }}
-              className={navButtonClass(item.id)}
-            >
-              {item.icon}
-              {item.label}
-            </button>
-          ))}
-        </div>
+        <div
+          className="md:hidden fixed inset-0 z-10 bg-black/20 backdrop-blur-[1px]"
+          onClick={() => setMobileMenuOpen(false)}
+        />
       )}
+
+      {/* Mobile dropdown */}
+      <div
+        className={`md:hidden fixed top-14 inset-x-0 z-20 bg-white border-b border-gray-200 px-3 py-2 space-y-0.5 shadow-lg transition-all duration-200 ease-out ${
+          mobileMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'
+        }`}
+      >
+        {NAV_ITEMS.map((item) => (
+          <button
+            key={item.id}
+            onClick={() => navigate(item.id)}
+            className={navButtonClass(item.id)}
+          >
+            {item.icon}
+            {item.label}
+          </button>
+        ))}
+        <div className="pt-2 pb-1">
+          <div className="flex items-center gap-2 bg-amber-50 rounded-lg px-3 py-2">
+            <span className="text-amber-500 text-xs">●</span>
+            <p className="text-xs text-amber-700 font-medium">Demo Mode — all data is simulated</p>
+          </div>
+        </div>
+      </div>
 
       {/* Main content */}
       <main className="flex-1 md:ml-60 pt-14 md:pt-0 min-h-screen">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+        <div
+          className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8"
+          style={{ paddingBottom: 'calc(3rem + env(safe-area-inset-bottom))' }}
+        >
           {children}
         </div>
       </main>

@@ -11,11 +11,13 @@ interface TransactionListProps {
   onDelete: (id: string) => void
 }
 
-function applyFilters(transactions: Transaction[], filters: TransactionFilters): Transaction[] {
+function applyFilters(transactions: Transaction[], filters: TransactionFilters, search: string): Transaction[] {
+  const q = search.toLowerCase().trim()
   return transactions.filter((t) => {
     if (filters.month !== 'all' && toMonthKey(t.date) !== filters.month) return false
     if (filters.type !== 'all' && t.type !== filters.type) return false
     if (filters.category !== 'all' && t.category !== filters.category) return false
+    if (q && !t.title.toLowerCase().includes(q) && !t.category.toLowerCase().includes(q)) return false
     return true
   })
 }
@@ -31,8 +33,9 @@ export default function TransactionList({ transactions, onEdit, onDelete }: Tran
     type: 'all',
     category: 'all',
   })
+  const [search, setSearch] = useState('')
 
-  const filtered = useMemo(() => applyFilters(transactions, filters), [transactions, filters])
+  const filtered = useMemo(() => applyFilters(transactions, filters, search), [transactions, filters, search])
   const sorted = useMemo(
     () => [...filtered].sort((a, b) => b.date.localeCompare(a.date)),
     [filtered]
@@ -40,6 +43,35 @@ export default function TransactionList({ transactions, onEdit, onDelete }: Tran
 
   return (
     <div className="flex flex-col gap-4">
+      {/* Search */}
+      <div className="relative">
+        <svg
+          className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
+          viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}
+          strokeLinecap="round" strokeLinejoin="round"
+        >
+          <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
+        </svg>
+        <input
+          type="text"
+          placeholder="Search transactions…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-shadow"
+        />
+        {search && (
+          <button
+            onClick={() => setSearch('')}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+            aria-label="Clear search"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+        )}
+      </div>
+
       <TransactionFiltersBar
         filters={filters}
         onChange={setFilters}
@@ -48,12 +80,16 @@ export default function TransactionList({ transactions, onEdit, onDelete }: Tran
 
       {sorted.length === 0 ? (
         <div className="text-center py-16 text-gray-400">
-          <p className="text-4xl mb-3">🔍</p>
-          <p className="text-sm font-medium text-gray-500">No transactions match your filters</p>
-          <p className="text-xs text-gray-400 mt-1">Try adjusting the month, type, or category</p>
+          <svg className="w-10 h-10 mx-auto mb-3 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
+          </svg>
+          <p className="text-sm font-medium text-gray-500">
+            {search ? `No results for "${search}"` : 'No transactions match your filters'}
+          </p>
+          <p className="text-xs text-gray-400 mt-1">Try adjusting your search or filters</p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm divide-y divide-gray-100">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm divide-y divide-gray-100 overflow-hidden">
           {sorted.map((t) => (
             <TransactionItem
               key={t.id}
