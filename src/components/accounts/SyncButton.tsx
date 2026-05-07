@@ -14,8 +14,13 @@ export default function SyncButton() {
   async function handleSync() {
     await syncAccounts()
 
+    // Remove stale synced transactions (old UUID-ID ones) before upserting stable-ID ones
+    const { transactions, deleteTransaction } = useTransactionsStore.getState()
+    transactions
+      .filter((t) => t.source === 'synced')
+      .forEach((t) => deleteTransaction(t.id))
+
     const now = new Date().toISOString()
-    // Upsert — safe to call multiple times, no duplicates
     buildDemoTransactions().forEach((t) => upsertTransaction({ ...t, importedAt: now }))
     buildDemoBudgets().forEach((b) => setBudget(b))
     buildDemoHoldings().forEach((h) => upsertHolding(h))

@@ -227,7 +227,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
           </p>
           <div className="flex gap-3 justify-end">
             <Button variant="secondary" onClick={() => setConfirmResetOpen(false)}>Cancel</Button>
-            <Button variant="danger" onClick={() => { clearDemoData(); setConfirmResetOpen(false) }}>
+            <Button variant="danger" onClick={() => { clearDemoData(); setOnboardingDismissed(false); setConfirmResetOpen(false) }}>
               Reset demo data
             </Button>
           </div>

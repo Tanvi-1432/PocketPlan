@@ -4,7 +4,6 @@ import { useGoalsStore } from '../store/goals'
 import { useAccountsStore } from '../store/accounts'
 import { useInvestmentsStore } from '../store/investments'
 import {
-  buildManualDemoTransactions,
   buildDemoTransactions,
   buildDemoBudgets,
   buildDemoGoals,
@@ -30,8 +29,7 @@ export function useDemoData() {
   function loadDemoData() {
     const now = new Date().toISOString()
 
-    // Transactions (manual + synced) — upsert by stable id
-    buildManualDemoTransactions().forEach((t) => upsertTransaction(t))
+    // Synced transactions only — manual set overlaps in category/amount and looks like duplicates
     buildDemoTransactions().forEach((t) => upsertTransaction({ ...t, importedAt: now }))
 
     // Budgets — setBudget is already an upsert by category+month
@@ -48,22 +46,20 @@ export function useDemoData() {
     buildDemoHoldings().forEach((h) => upsertHolding(h))
   }
 
-  // Removes only demo-prefixed entities — reads live state to avoid stale closures
+  // Clears all data and resets onboarding so the welcome card reappears
   function clearDemoData() {
     useTransactionsStore.getState().transactions
-      .filter((t) => t.id.startsWith('demo-'))
       .forEach((t) => useTransactionsStore.getState().deleteTransaction(t.id))
 
     useBudgetsStore.getState().budgets
-      .filter((b) => b.id.startsWith('demo-'))
       .forEach((b) => useBudgetsStore.getState().deleteBudget(b.id))
 
     useGoalsStore.getState().goals
-      .filter((g) => g.id.startsWith('demo-'))
       .forEach((g) => useGoalsStore.getState().deleteGoal(g.id))
 
     clearConnectedAccounts()
     clearHoldings()
+    localStorage.removeItem('pocketplan-onboarding-dismissed')
   }
 
   // Nuclear clear — removes everything including user-created data
