@@ -6,6 +6,7 @@ import type { Transaction } from '../types'
 interface TransactionsState {
   transactions: Transaction[]
   addTransaction: (data: Omit<Transaction, 'id'>) => void
+  upsertTransaction: (tx: Transaction) => void
   updateTransaction: (id: string, data: Partial<Omit<Transaction, 'id'>>) => void
   deleteTransaction: (id: string) => void
 }
@@ -19,6 +20,16 @@ export const useTransactionsStore = create<TransactionsState>()(
         set((state) => ({
           transactions: [{ ...data, id: uuidv4() }, ...state.transactions],
         })),
+
+      // Upsert by stable id — inserts if not found, replaces if found
+      upsertTransaction: (tx) =>
+        set((state) => {
+          const exists = state.transactions.some((t) => t.id === tx.id)
+          if (exists) {
+            return { transactions: state.transactions.map((t) => (t.id === tx.id ? tx : t)) }
+          }
+          return { transactions: [tx, ...state.transactions] }
+        }),
 
       updateTransaction: (id, data) =>
         set((state) => ({

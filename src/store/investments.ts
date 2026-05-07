@@ -6,6 +6,7 @@ import { buildDemoHoldings } from '../constants/demoData'
 interface InvestmentsState {
   holdings: InvestmentHolding[]
   addHolding: (holding: InvestmentHolding) => void
+  upsertHolding: (holding: InvestmentHolding) => void
   updateHolding: (id: string, data: Partial<InvestmentHolding>) => void
   deleteHolding: (id: string) => void
   loadDemoHoldings: () => void
@@ -19,6 +20,15 @@ export const useInvestmentsStore = create<InvestmentsState>()(
 
       addHolding: (holding) =>
         set((state) => ({ holdings: [...state.holdings, holding] })),
+
+      upsertHolding: (holding) =>
+        set((state) => {
+          const exists = state.holdings.some((h) => h.id === holding.id)
+          if (exists) {
+            return { holdings: state.holdings.map((h) => (h.id === holding.id ? holding : h)) }
+          }
+          return { holdings: [...state.holdings, holding] }
+        }),
 
       updateHolding: (id, data) =>
         set((state) => ({

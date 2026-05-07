@@ -18,14 +18,14 @@ export default function BudgetProgressList({ items, onViewAll }: BudgetProgressL
         action={
           <button
             onClick={onViewAll}
-            className="text-xs font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
+            className="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors"
           >
             Manage →
           </button>
         }
       />
       {preview.length === 0 ? (
-        <CardBody className="text-center text-sm text-gray-400 py-8">
+        <CardBody className="text-center text-sm text-slate-400 dark:text-slate-500 py-8">
           No budgets set for this month
         </CardBody>
       ) : (
@@ -33,22 +33,17 @@ export default function BudgetProgressList({ items, onViewAll }: BudgetProgressL
           {preview.map(({ budget, spent, remaining, isOverBudget, percentUsed }) => (
             <div key={budget.id}>
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-sm font-medium text-gray-700">{budget.category}</span>
-                <span className={`text-xs font-medium ${isOverBudget ? 'text-red-600' : 'text-gray-500'}`}>
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{budget.category}</span>
+                <span className={`text-xs font-medium ${isOverBudget ? 'text-red-600 dark:text-red-400' : 'text-slate-500 dark:text-slate-400'}`}>
                   {formatCurrency(spent)} / {formatCurrency(budget.limit)}
                 </span>
               </div>
               <ProgressBar percent={percentUsed} isOverBudget={isOverBudget} showLabel />
-              {isOverBudget && (
-                <p className="text-xs text-red-500 mt-1">
-                  Over by {formatCurrency(spent - budget.limit)}
-                </p>
-              )}
-              {!isOverBudget && (
-                <p className="text-xs text-gray-400 mt-1">
-                  {formatCurrency(remaining)} remaining
-                </p>
-              )}
+              <p className={`text-xs mt-1 ${isOverBudget ? 'text-red-500 dark:text-red-400' : 'text-slate-400 dark:text-slate-500'}`}>
+                {isOverBudget
+                  ? `Over by ${formatCurrency(spent - budget.limit)}`
+                  : `${formatCurrency(remaining)} remaining`}
+              </p>
             </div>
           ))}
         </CardBody>

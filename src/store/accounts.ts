@@ -1,11 +1,12 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { ConnectedAccount } from '../types'
-import { DEMO_ACCOUNTS } from '../constants/demoData'
+import { buildDemoAccounts } from '../constants/demoData'
 
 interface AccountsState {
   accounts: ConnectedAccount[]
   isSyncing: boolean
+  setAccounts: (accounts: ConnectedAccount[]) => void
   addConnectedAccount: (account: ConnectedAccount) => void
   removeConnectedAccount: (id: string) => void
   updateConnectedAccount: (id: string, data: Partial<ConnectedAccount>) => void
@@ -19,6 +20,8 @@ export const useAccountsStore = create<AccountsState>()(
       accounts: [],
       isSyncing: false,
 
+      setAccounts: (accounts) => set({ accounts }),
+
       addConnectedAccount: (account) =>
         set((state) => ({ accounts: [...state.accounts, account] })),
 
@@ -31,7 +34,6 @@ export const useAccountsStore = create<AccountsState>()(
         })),
 
       syncAccounts: async () => {
-        // Mark all accounts as syncing
         set((state) => ({
           isSyncing: true,
           accounts: state.accounts.map((a) => ({ ...a, status: 'syncing' as const })),
@@ -40,21 +42,16 @@ export const useAccountsStore = create<AccountsState>()(
         await new Promise<void>((resolve) => setTimeout(resolve, 1800))
 
         const now = new Date().toISOString()
+        const current = get().accounts
 
-        // If no accounts yet, load demo set; otherwise just refresh balances/timestamps
-        if (get().accounts.length === 0 || get().accounts.every((a) => a.status === 'syncing')) {
-          set({
-            isSyncing: false,
-            accounts: DEMO_ACCOUNTS.map((a) => ({ ...a, lastSynced: now, status: 'connected' as const })),
-          })
+        if (current.length === 0 || current.every((a) => a.status === 'syncing')) {
+          // First sync — load full demo set
+          set({ isSyncing: false, accounts: buildDemoAccounts(now) })
         } else {
+          // Re-sync — just refresh timestamps
           set((state) => ({
             isSyncing: false,
-            accounts: state.accounts.map((a) => ({
-              ...a,
-              lastSynced: now,
-              status: 'connected' as const,
-            })),
+            accounts: state.accounts.map((a) => ({ ...a, lastSynced: now, status: 'connected' as const })),
           }))
         }
       },

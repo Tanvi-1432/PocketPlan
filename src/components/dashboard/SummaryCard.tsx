@@ -8,11 +8,11 @@ interface SummaryCardProps {
 
 const VARIANT_STYLES = {
   income: {
-    bg: 'bg-white border border-gray-200',
-    amount: 'text-emerald-600',
-    label: 'text-gray-500',
-    iconBg: 'bg-emerald-100',
-    iconText: 'text-emerald-600',
+    bg: 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800',
+    amount: 'text-emerald-600 dark:text-emerald-400',
+    label: 'text-slate-500 dark:text-slate-400',
+    iconBg: 'bg-emerald-100 dark:bg-emerald-900/50',
+    iconText: 'text-emerald-600 dark:text-emerald-400',
     icon: (
       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 19V5M5 12l7-7 7 7" />
@@ -20,11 +20,11 @@ const VARIANT_STYLES = {
     ),
   },
   expense: {
-    bg: 'bg-white border border-gray-200',
-    amount: 'text-red-600',
-    label: 'text-gray-500',
-    iconBg: 'bg-red-100',
-    iconText: 'text-red-600',
+    bg: 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800',
+    amount: 'text-red-600 dark:text-red-400',
+    label: 'text-slate-500 dark:text-slate-400',
+    iconBg: 'bg-red-100 dark:bg-red-900/50',
+    iconText: 'text-red-600 dark:text-red-400',
     icon: (
       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 5v14M19 12l-7 7-7-7" />
@@ -51,7 +51,7 @@ export default function SummaryCard({ label, amount, variant }: SummaryCardProps
   const displayAmount = isNegative ? `-${formatCurrency(Math.abs(amount))}` : formatCurrency(amount)
 
   return (
-    <div className={`${s.bg} rounded-xl px-3 py-3 sm:px-5 sm:py-5 shadow-sm hover:shadow-md transition-shadow duration-200`}>
+    <div className={`${s.bg} rounded-xl px-3 py-3 sm:px-5 sm:py-5 shadow-sm hover:shadow-md transition-all duration-200`}>
       <div className="flex items-center justify-between mb-2 sm:mb-3">
         <p className={`text-[10px] sm:text-xs font-semibold uppercase tracking-wider ${s.label}`}>{label}</p>
         <div className={`${s.iconBg} ${s.iconText} w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center`}>

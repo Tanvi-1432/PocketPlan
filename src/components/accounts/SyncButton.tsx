@@ -2,50 +2,36 @@ import { useAccountsStore } from '../../store/accounts'
 import { useTransactionsStore } from '../../store/transactions'
 import { useBudgetsStore } from '../../store/budgets'
 import { useInvestmentsStore } from '../../store/investments'
-import { buildDemoTransactions, buildDemoBudgets } from '../../constants/demoData'
+import { buildDemoTransactions, buildDemoBudgets, buildDemoHoldings } from '../../constants/demoData'
 import { Button } from '../ui'
 
 export default function SyncButton() {
-  const { isSyncing, accounts, syncAccounts, clearConnectedAccounts } = useAccountsStore()
-  const { transactions, addTransaction, deleteTransaction } = useTransactionsStore()
+  const { isSyncing, accounts, syncAccounts } = useAccountsStore()
+  const { upsertTransaction } = useTransactionsStore()
   const { setBudget } = useBudgetsStore()
-  const { loadDemoHoldings, clearHoldings } = useInvestmentsStore()
+  const { upsertHolding } = useInvestmentsStore()
 
   async function handleSync() {
     await syncAccounts()
 
-    // Load demo transactions if none synced yet
-    const hasSynced = transactions.some((t) => t.source === 'synced')
-    if (!hasSynced) {
-      buildDemoTransactions().forEach((t) => addTransaction(t))
-    }
-
-    // Load demo budgets
+    const now = new Date().toISOString()
+    // Upsert — safe to call multiple times, no duplicates
+    buildDemoTransactions().forEach((t) => upsertTransaction({ ...t, importedAt: now }))
     buildDemoBudgets().forEach((b) => setBudget(b))
-
-    // Load demo holdings
-    loadDemoHoldings()
-  }
-
-  function handleClear() {
-    clearConnectedAccounts()
-    clearHoldings()
-    // Remove synced transactions only
-    transactions
-      .filter((t) => t.source === 'synced')
-      .forEach((t) => deleteTransaction(t.id))
+    buildDemoHoldings().forEach((h) => upsertHolding(h))
   }
 
   return (
-    <div className="flex items-center gap-3">
-      <Button onClick={handleSync} disabled={isSyncing}>
-        {isSyncing ? '⟳ Syncing…' : '⟳ Simulate Account Sync'}
-      </Button>
-      {accounts.length > 0 && (
-        <Button variant="secondary" onClick={handleClear} disabled={isSyncing}>
-          Clear Demo Data
-        </Button>
-      )}
-    </div>
+    <Button onClick={handleSync} disabled={isSyncing} className="gap-2">
+      <svg
+        className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`}
+        viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}
+        strokeLinecap="round" strokeLinejoin="round"
+      >
+        <path d="M23 4v6h-6M1 20v-6h6" />
+        <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
+      </svg>
+      {isSyncing ? 'Syncing…' : accounts.length > 0 ? 'Re-sync Accounts' : 'Simulate Account Sync'}
+    </Button>
   )
 }

@@ -26,14 +26,16 @@ export default function Select({
   return (
     <div className="flex flex-col gap-1">
       {label && (
-        <label htmlFor={selectId} className="text-sm font-medium text-gray-700">
+        <label htmlFor={selectId} className="text-sm font-medium text-slate-700 dark:text-slate-300">
           {label}
         </label>
       )}
       <select
         id={selectId}
-        className={`w-full rounded-lg border px-3 py-2 text-sm text-gray-900 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white ${
-          error ? 'border-red-400 bg-red-50' : 'border-gray-300 hover:border-gray-400'
+        className={`w-full rounded-lg border px-3 py-2 text-sm text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
+          error
+            ? 'border-red-400'
+            : 'border-slate-300 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-600'
         } ${className}`}
         {...props}
       >
@@ -48,7 +50,7 @@ export default function Select({
           </option>
         ))}
       </select>
-      {error && <p className="text-xs text-red-600">{error}</p>}
+      {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
     </div>
   )
 }

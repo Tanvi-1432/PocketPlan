@@ -31,11 +31,11 @@ export default function ContributionForm({ goal, onSubmit, onCancel }: Contribut
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <div className="bg-indigo-50 rounded-lg px-4 py-3 text-sm">
-        <p className="text-indigo-700 font-medium">{goal.name}</p>
-        <p className="text-indigo-500 mt-0.5">
+      <div className="bg-indigo-50 dark:bg-indigo-950/40 rounded-lg px-4 py-3 text-sm border border-indigo-100 dark:border-indigo-900/50">
+        <p className="text-indigo-700 dark:text-indigo-300 font-medium">{goal.name}</p>
+        <p className="text-indigo-500 dark:text-indigo-400 mt-0.5">
           {formatCurrency(goal.currentAmount)} saved of {formatCurrency(goal.targetAmount)}
-          <span className="text-indigo-400"> · {formatCurrency(remaining)} to go</span>
+          <span className="text-indigo-400 dark:text-indigo-500"> · {formatCurrency(remaining)} to go</span>
         </p>
       </div>
       <Input
