@@ -78,31 +78,25 @@ html {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
-  /* Prevent white flash behind notch/dynamic island */
-  background:
-    radial-gradient(ellipse at 10% 10%, rgba(167,139,250,0.18) 0%, transparent 38%),
-    radial-gradient(ellipse at 90% 85%, rgba(96,165,250,0.14) 0%, transparent 40%),
-    linear-gradient(160deg, #f8fafc 0%, #eef2ff 50%, #faf5ff 100%);
+  /* Solid base color covers notch / Dynamic Island safe area */
+  background-color: #f6f2ff;
   width: 100%;
   min-height: 100%;
 }
 
 html.dark {
-  background:
-    radial-gradient(ellipse at 10% 10%, rgba(139,92,246,0.18) 0%, transparent 38%),
-    radial-gradient(ellipse at 90% 85%, rgba(59,130,246,0.14) 0%, transparent 40%),
-    linear-gradient(160deg, #020617 0%, #0f172a 50%, #0d1526 100%);
+  background-color: #0b1020;
 }
 
 body {
-  background: var(--page-bg);
-  background-attachment: fixed;
+  background: transparent;
   min-height: 100vh;
   min-height: 100dvh;
   margin: 0;
   padding: 0;
   /* Prevent white bounce/overscroll flash on iOS */
   overscroll-behavior: none;
+  overscroll-behavior-y: none;
   /* Prevent any child from blowing out horizontal layout */
   overflow-x: hidden;
   position: relative;
@@ -114,6 +108,18 @@ body {
   min-height: 100dvh;
   overflow-x: hidden;
   isolation: isolate;
+}
+
+/* ── Fixed fullscreen background (covers safe areas) ────── */
+/* position: fixed + inset: 0 means it covers the notch, Dynamic Island,
+   and bottom safe area that are outside body's painted rect on iPhone Safari */
+.app-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--page-bg);
+  background-attachment: fixed;
 }
 
 /* ── Page background (applied to root div) ──────────────── */

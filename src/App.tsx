@@ -30,9 +30,12 @@ export default function App() {
   }
 
   return (
-    <Layout currentPage={currentPage} onNavigate={setCurrentPage}>
-      {renderPage()}
-      <ToastContainer />
-    </Layout>
+    <>
+      <div className="app-bg" aria-hidden="true" />
+      <Layout currentPage={currentPage} onNavigate={setCurrentPage}>
+        {renderPage()}
+        <ToastContainer />
+      </Layout>
+    </>
   )
 }
