@@ -4,7 +4,6 @@ interface CardProps {
   children: ReactNode
   className?: string
   glass?: boolean
-  glow?: 'indigo' | 'emerald' | 'red' | 'none'
 }
 
 interface CardHeaderProps {
@@ -13,14 +12,9 @@ interface CardHeaderProps {
   action?: ReactNode
 }
 
-export default function Card({ children, className = '', glass = false, glow = 'none' }: CardProps) {
-  const glowClass = glow === 'indigo' ? 'shadow-glow-indigo' : glow === 'emerald' ? 'shadow-glow-emerald' : glow === 'red' ? 'shadow-glow-red' : ''
-  const baseClass = glass
-    ? `glass-card ${glowClass}`
-    : `bg-white dark:bg-slate-900/80 rounded-2xl border border-slate-200/80 dark:border-white/6 shadow-card transition-colors duration-200 ${glowClass}`
-
+export default function Card({ children, className = '' }: CardProps) {
   return (
-    <div className={`${baseClass} ${className}`}>
+    <div className={`card ${className}`}>
       {children}
     </div>
   )
@@ -28,9 +22,10 @@ export default function Card({ children, className = '', glass = false, glow = '
 
 export function CardHeader({ title, subtitle, action }: CardHeaderProps) {
   return (
-    <div className="flex items-start justify-between px-5 py-4 border-b border-slate-100/80 dark:border-white/5">
+    <div className="flex items-start justify-between px-5 py-4"
+      style={{ borderBottom: '1px solid rgba(200,200,230,0.25)' }}>
       <div>
-        <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-200">{title}</h2>
+        <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200">{title}</h2>
         {subtitle && <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{subtitle}</p>}
       </div>
       {action && <div className="ml-4 shrink-0">{action}</div>}

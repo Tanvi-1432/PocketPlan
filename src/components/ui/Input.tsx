@@ -12,20 +12,26 @@ export default function Input({ label, error, hint, className = '', id, ...props
   return (
     <div className="flex flex-col gap-1.5">
       {label && (
-        <label htmlFor={inputId} className="text-sm font-medium text-slate-700 dark:text-slate-300">
+        <label htmlFor={inputId} className="text-sm font-medium text-slate-600 dark:text-slate-300">
           {label}
         </label>
       )}
       <input
         id={inputId}
-        className={`w-full rounded-xl border px-3.5 py-2.5 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-400 dark:focus:border-indigo-500 ${
+        className={`w-full rounded-xl px-3.5 py-2.5 text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400/70 dark:placeholder-slate-500 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-violet-400/40 ${
           error
-            ? 'border-red-400 bg-red-50/80 dark:bg-red-500/8 dark:border-red-500/50'
-            : 'border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 hover:border-slate-300 dark:hover:border-white/15'
+            ? 'border border-rose-300 dark:border-rose-500/40 bg-rose-50/60 dark:bg-rose-500/6'
+            : ''
         } ${className}`}
+        style={error ? {} : {
+          background: 'rgba(255,255,255,0.55)',
+          border: '1px solid rgba(200,200,230,0.45)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
+        }}
         {...props}
       />
-      {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
+      {error && <p className="text-xs text-rose-500 dark:text-rose-400">{error}</p>}
       {hint && !error && <p className="text-xs text-slate-400 dark:text-slate-500">{hint}</p>}
     </div>
   )

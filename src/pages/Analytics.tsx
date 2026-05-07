@@ -72,7 +72,7 @@ function GradeCircle({ score, grade }: { score: number; grade: string }) {
   )
 }
 
-const cardClass = 'bg-white/80 dark:bg-slate-900/70 backdrop-blur-sm rounded-2xl border border-slate-200/70 dark:border-white/6 shadow-card p-6'
+const cardClass = 'card p-6'
 
 export default function Analytics() {
   const { transactions } = useTransactionsStore()
@@ -174,8 +174,8 @@ export default function Analytics() {
             <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
             <Tooltip formatter={(v) => formatCurrency(Number(v))} {...CHART_TOOLTIP_STYLE} />
             <Legend wrapperStyle={{ fontSize: 11, paddingTop: '8px' }} iconType="circle" iconSize={8} />
-            <Bar dataKey="Income"   fill="#10b981" radius={[5, 5, 0, 0]} />
-            <Bar dataKey="Expenses" fill="#6366f1" radius={[5, 5, 0, 0]} />
+            <Bar dataKey="Income"   fill="#6ee7b7" radius={[5, 5, 0, 0]} />
+            <Bar dataKey="Expenses" fill="#c4b5fd" radius={[5, 5, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </section>
@@ -190,9 +190,9 @@ export default function Analytics() {
             <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
             <Tooltip formatter={(v) => formatCurrency(Number(v))} {...CHART_TOOLTIP_STYLE} />
             <Line
-              type="monotone" dataKey="Savings" stroke="#10b981" strokeWidth={2.5}
-              dot={{ r: 4, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }}
-              activeDot={{ r: 6, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }}
+              type="monotone" dataKey="Savings" stroke="#a78bfa" strokeWidth={2.5}
+              dot={{ r: 4, fill: '#a78bfa', strokeWidth: 2, stroke: '#fff' }}
+              activeDot={{ r: 6, fill: '#a78bfa', strokeWidth: 2, stroke: '#fff' }}
             />
           </LineChart>
         </ResponsiveContainer>
