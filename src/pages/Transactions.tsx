@@ -32,12 +32,12 @@ export default function Transactions() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Transactions</h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Track your income and expenses</p>
         </div>
-        <Button onClick={openAdd}>+ Add transaction</Button>
+        <Button onClick={openAdd} className="self-start sm:self-auto shrink-0">+ Add transaction</Button>
       </div>
 
       {transactions.length === 0 ? (

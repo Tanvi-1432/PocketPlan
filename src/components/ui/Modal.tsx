@@ -24,34 +24,28 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Overlay */}
       <div
-        className="absolute inset-0"
-        style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', background: 'rgba(15,23,42,0.25)' }}
+        className="absolute inset-0 modal-overlay"
         onClick={onClose}
         aria-hidden="true"
       />
+
+      {/* Panel */}
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
-        className="relative z-10 w-full max-w-md animate-scale-in"
-        style={{
-          background: 'rgba(255,255,255,0.88)',
-          backdropFilter: 'blur(28px)',
-          WebkitBackdropFilter: 'blur(28px)',
-          border: '1px solid rgba(255,255,255,0.70)',
-          borderRadius: '1.5rem',
-          boxShadow: '0 20px 60px rgba(100,116,139,0.14), 0 4px 16px rgba(100,116,139,0.08)',
-        }}
+        className="relative z-10 w-full max-w-md animate-scale-in modal-panel"
       >
-        <div className="flex items-center justify-between px-6 py-4"
-          style={{ borderBottom: '1px solid rgba(226,232,240,0.60)' }}>
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 modal-header-border">
           <h2 id="modal-title" className="text-base font-semibold text-slate-800 dark:text-slate-100">
             {title}
           </h2>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-black/5 dark:hover:text-slate-300 dark:hover:bg-white/8 transition-all duration-150 active:scale-90"
+            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-black/5 dark:text-slate-500 dark:hover:text-slate-300 dark:hover:bg-white/8 transition-all duration-150 active:scale-90"
             aria-label="Close"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
@@ -59,6 +53,8 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
             </svg>
           </button>
         </div>
+
+        {/* Body */}
         <div className="px-6 py-5">{children}</div>
       </div>
     </div>

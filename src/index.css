@@ -321,6 +321,46 @@ body {
 .stagger-3 { animation-delay: 0.15s; }
 .stagger-4 { animation-delay: 0.20s; }
 
+/* ── Modal panel ────────────────────────────────────────── */
+.modal-panel {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(255, 255, 255, 0.70);
+  border-radius: 1.5rem;
+  box-shadow: 0 20px 60px rgba(100, 116, 139, 0.14), 0 4px 16px rgba(100, 116, 139, 0.08);
+}
+
+@variant dark {
+  .modal-panel {
+    background: rgba(10, 15, 30, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.50), 0 4px 16px rgba(0, 0, 0, 0.30);
+  }
+}
+
+.modal-header-border {
+  border-bottom: 1px solid rgba(226, 232, 240, 0.60);
+}
+
+@variant dark {
+  .modal-header-border {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  }
+}
+
+.modal-overlay {
+  background: rgba(15, 23, 42, 0.20);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+@variant dark {
+  .modal-overlay {
+    background: rgba(2, 6, 23, 0.55);
+  }
+}
+
 /* ── Scrollbar ──────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }

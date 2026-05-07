@@ -72,7 +72,7 @@ export default function TransactionList({
           placeholder="Search transactions…"
           value={localSearch}
           onChange={(e) => handleSearchChange(e.target.value)}
-          className="w-full pl-9 pr-9 py-2 text-sm border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-shadow"
+          className="w-full pl-9 pr-9 py-2.5 text-sm rounded-xl border bg-white/70 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-400/40 focus:border-violet-300 dark:focus:border-violet-600 transition-all"
         />
         {localSearch && (
           <button onClick={() => handleSearchChange('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors" aria-label="Clear search">
@@ -96,7 +96,7 @@ export default function TransactionList({
           <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Try adjusting your search or filters</p>
         </div>
       ) : (
-        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm divide-y divide-slate-100 dark:divide-slate-800 overflow-hidden">
+        <div className="glass-card overflow-hidden divide-y divide-slate-100/70 dark:divide-white/5" style={{ borderRadius: '1rem', padding: 0 }}>
           {sorted.map((t) => (
             <TransactionItem
               key={t.id}
