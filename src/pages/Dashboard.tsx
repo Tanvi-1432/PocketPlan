@@ -19,6 +19,8 @@ import {
 } from '../utils'
 import { getBudgetProgress } from '../utils/budgets'
 import { getNetWorth, getTotalPortfolioValue } from '../utils/investments'
+import { computeCashFlowForecast } from '../utils/forecast'
+import { getSpendingComparisons } from '../utils/trends'
 import SummaryCard from '../components/dashboard/SummaryCard'
 import CategoryChart from '../components/dashboard/CategoryChart'
 import MonthlyChart from '../components/dashboard/MonthlyChart'
@@ -79,6 +81,8 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
   const netWorth           = useMemo(() => getNetWorth(accounts), [accounts])
   const portfolioValue     = useMemo(() => getTotalPortfolioValue(holdings), [holdings])
   const insights           = useMemo(() => generateInsights(transactions, budgets, monthKey), [transactions, budgets, monthKey])
+  const forecast           = useMemo(() => computeCashFlowForecast(transactions, budgets, netWorth.cash), [transactions, budgets, netWorth.cash])
+  const comparisons        = useMemo(() => getSpendingComparisons(transactions, monthKey).slice(0, 3), [transactions, monthKey])
 
   const lastSynced = accounts.length > 0
     ? accounts.reduce<string | null>((latest, a) => {
@@ -106,6 +110,16 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
   }
 
   const showOnboarding = !hasData && !onboardingDismissed
+
+  const forecastColor =
+    forecast.projectedBalance >= 1000 ? 'text-emerald-600 dark:text-emerald-400' :
+    forecast.projectedBalance >= 0    ? 'text-amber-600 dark:text-amber-400' :
+                                        'text-red-500 dark:text-red-400'
+
+  const forecastBg =
+    forecast.projectedBalance >= 1000 ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-100 dark:border-emerald-900/50' :
+    forecast.projectedBalance >= 0    ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-100 dark:border-amber-900/50' :
+                                        'bg-red-50 dark:bg-red-950/40 border-red-100 dark:border-red-900/50'
 
   return (
     <div className="flex flex-col gap-6">
@@ -147,12 +161,8 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                 Explore a simulated personal finance dashboard with budgets, transactions, connected accounts, and investments. No real data required.
               </p>
               <div className="flex flex-wrap gap-3 mt-4">
-                <Button onClick={handleLoadDemo}>
-                  Load demo experience
-                </Button>
-                <Button variant="secondary" onClick={handleDismissOnboarding}>
-                  Start empty
-                </Button>
+                <Button onClick={handleLoadDemo}>Load demo experience</Button>
+                <Button variant="secondary" onClick={handleDismissOnboarding}>Start empty</Button>
               </div>
             </div>
           </div>
@@ -188,6 +198,67 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
         <SummaryCard label="Expenses" amount={expenses} variant="expense" />
         <SummaryCard label="Balance" amount={balance} variant="balance" />
       </div>
+
+      {/* Forecast + Safe-to-Spend — only show when there's data */}
+      {hasData && forecast.remainingDays > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {/* Cash flow forecast */}
+          <div className={`rounded-xl border px-5 py-4 ${forecastBg}`}>
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">
+              Projected Month-End
+            </p>
+            <p className={`text-2xl font-bold ${forecastColor}`}>
+              {formatCurrency(forecast.projectedBalance)}
+            </p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              {forecast.remainingDays} days remaining · {forecast.confidence} confidence
+            </p>
+          </div>
+
+          {/* Safe to spend */}
+          <div className="rounded-xl border border-indigo-100 dark:border-indigo-900/50 bg-indigo-50 dark:bg-indigo-950/40 px-5 py-4">
+            <p className="text-xs font-medium text-indigo-600 dark:text-indigo-400 uppercase tracking-wide mb-1">
+              Safe to Spend
+            </p>
+            <p className="text-2xl font-bold text-indigo-700 dark:text-indigo-300">
+              {formatCurrency(forecast.safeToSpendDaily)}<span className="text-sm font-normal text-indigo-500 dark:text-indigo-400">/day</span>
+            </p>
+            <p className="text-xs text-indigo-500 dark:text-indigo-400 mt-1">
+              After committed expenses for the rest of the month
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Month-over-month spending changes */}
+      {comparisons.length > 0 && (
+        <section>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Spending Changes vs Last Month</h2>
+            <button onClick={() => onNavigate('analytics')} className="text-xs text-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+              View analytics →
+            </button>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            {comparisons.map((c) => {
+              const up = c.delta > 0
+              const neutral = Math.abs(c.delta) < 1
+              return (
+                <div key={c.category} className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 px-4 py-3">
+                  <p className="text-xs text-slate-500 dark:text-slate-400">{c.category}</p>
+                  <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-0.5">{formatCurrency(c.thisMonth)}</p>
+                  <span className={`text-xs font-medium ${
+                    neutral ? 'text-slate-400' :
+                    up ? 'text-red-500 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'
+                  }`}>
+                    {neutral ? 'No change' : `${up ? '↑' : '↓'} ${Math.abs(c.delta).toFixed(0)}% vs last month`}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        </section>
+      )}
 
       {/* Monthly insights */}
       {insights.length > 0 && (

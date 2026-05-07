@@ -9,6 +9,11 @@ interface TransactionListProps {
   transactions: Transaction[]
   onEdit: (t: Transaction) => void
   onDelete: (id: string) => void
+  onViewDetail: (t: Transaction) => void
+  persistedSearch?: string
+  persistedFilters?: TransactionFilters
+  onSearchChange?: (s: string) => void
+  onFiltersChange?: (f: TransactionFilters) => void
 }
 
 function applyFilters(transactions: Transaction[], filters: TransactionFilters, search: string): Transaction[] {
@@ -22,17 +27,38 @@ function applyFilters(transactions: Transaction[], filters: TransactionFilters, 
   })
 }
 
-export default function TransactionList({ transactions, onEdit, onDelete }: TransactionListProps) {
+const DEFAULT_FILTERS: TransactionFilters = { month: 'all', type: 'all', category: 'all' }
+
+export default function TransactionList({
+  transactions,
+  onEdit,
+  onDelete,
+  onViewDetail,
+  persistedSearch = '',
+  persistedFilters = DEFAULT_FILTERS,
+  onSearchChange,
+  onFiltersChange,
+}: TransactionListProps) {
   const availableMonths = useMemo(() => {
     const months = [...new Set(transactions.map((t) => toMonthKey(t.date)))]
     return months.sort((a, b) => b.localeCompare(a))
   }, [transactions])
 
-  const [filters, setFilters] = useState<TransactionFilters>({ month: 'all', type: 'all', category: 'all' })
-  const [search, setSearch] = useState('')
+  const [localSearch, setLocalSearch]   = useState(persistedSearch)
+  const [localFilters, setLocalFilters] = useState<TransactionFilters>(persistedFilters)
 
-  const filtered = useMemo(() => applyFilters(transactions, filters, search), [transactions, filters, search])
-  const sorted = useMemo(() => [...filtered].sort((a, b) => b.date.localeCompare(a.date)), [filtered])
+  function handleSearchChange(s: string) {
+    setLocalSearch(s)
+    onSearchChange?.(s)
+  }
+
+  function handleFiltersChange(f: TransactionFilters) {
+    setLocalFilters(f)
+    onFiltersChange?.(f)
+  }
+
+  const filtered = useMemo(() => applyFilters(transactions, localFilters, localSearch), [transactions, localFilters, localSearch])
+  const sorted   = useMemo(() => [...filtered].sort((a, b) => b.date.localeCompare(a.date)), [filtered])
 
   return (
     <div className="flex flex-col gap-4">
@@ -44,12 +70,12 @@ export default function TransactionList({ transactions, onEdit, onDelete }: Tran
         <input
           type="text"
           placeholder="Search transactions…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          value={localSearch}
+          onChange={(e) => handleSearchChange(e.target.value)}
           className="w-full pl-9 pr-9 py-2 text-sm border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-shadow"
         />
-        {search && (
-          <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors" aria-label="Clear search">
+        {localSearch && (
+          <button onClick={() => handleSearchChange('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors" aria-label="Clear search">
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <path d="M18 6L6 18M6 6l12 12" />
             </svg>
@@ -57,7 +83,7 @@ export default function TransactionList({ transactions, onEdit, onDelete }: Tran
         )}
       </div>
 
-      <TransactionFiltersBar filters={filters} onChange={setFilters} availableMonths={availableMonths} />
+      <TransactionFiltersBar filters={localFilters} onChange={handleFiltersChange} availableMonths={availableMonths} />
 
       {sorted.length === 0 ? (
         <div className="text-center py-16">
@@ -65,14 +91,20 @@ export default function TransactionList({ transactions, onEdit, onDelete }: Tran
             <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
           </svg>
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-            {search ? `No results for "${search}"` : 'No transactions match your filters'}
+            {localSearch ? `No results for "${localSearch}"` : 'No transactions match your filters'}
           </p>
           <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Try adjusting your search or filters</p>
         </div>
       ) : (
         <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm divide-y divide-slate-100 dark:divide-slate-800 overflow-hidden">
           {sorted.map((t) => (
-            <TransactionItem key={t.id} transaction={t} onEdit={onEdit} onDelete={onDelete} />
+            <TransactionItem
+              key={t.id}
+              transaction={t}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              onViewDetail={onViewDetail}
+            />
           ))}
         </div>
       )}

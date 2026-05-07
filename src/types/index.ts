@@ -16,6 +16,8 @@ export type Category =
 
 export type TransactionSource = 'manual' | 'synced'
 
+export type RecurringFrequency = 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'yearly'
+
 export interface Transaction {
   id: string
   title: string
@@ -24,11 +26,20 @@ export interface Transaction {
   category: Category
   date: string              // ISO date string: "YYYY-MM-DD"
   note?: string
+  tags?: string[]
   // Sync fields — only present on imported transactions
   accountId?: string
   institutionName?: string
   source?: TransactionSource
   importedAt?: string       // ISO datetime string
+  // Auto-categorization
+  autoCategorized?: boolean
+  categoryOverridden?: boolean
+  // Recurring
+  isRecurring?: boolean
+  recurringFrequency?: RecurringFrequency
+  nextOccurrence?: string   // ISO date string: "YYYY-MM-DD"
+  recurringSeriesId?: string
 }
 
 export interface Budget {
@@ -115,4 +126,79 @@ export interface NetWorthSummary {
   investments: number
   creditCardDebt: number
   netWorth: number
+}
+
+// ---- Subscription detection ----
+
+export interface DetectedSubscription {
+  seriesKey: string         // normalized merchant key
+  title: string             // display name
+  amount: number            // typical amount
+  frequency: RecurringFrequency
+  lastCharged: string       // ISO date
+  nextExpected: string      // ISO date
+  occurrences: number       // how many times detected
+  category: Category
+}
+
+// ---- Financial health ----
+
+export interface HealthFactor {
+  label: string
+  score: number             // 0-100
+  weight: number            // relative weight
+  description: string
+  suggestion?: string
+}
+
+export interface FinancialHealthScore {
+  total: number             // 0-100 weighted composite
+  grade: 'A' | 'B' | 'C' | 'D' | 'F'
+  factors: HealthFactor[]
+}
+
+// ---- Undo ----
+
+export type UndoableAction =
+  | { type: 'DELETE_TRANSACTION'; payload: Transaction }
+  | { type: 'DELETE_BUDGET'; payload: Budget }
+  | { type: 'DELETE_GOAL'; payload: SavingsGoal }
+
+// ---- Settings ----
+
+export type ThemePreference = 'light' | 'dark' | 'system'
+export type CurrencyCode = 'USD' | 'EUR' | 'GBP' | 'CAD' | 'AUD'
+export type DateFormatPreference = 'MMM D, YYYY' | 'MM/DD/YYYY' | 'DD/MM/YYYY' | 'YYYY-MM-DD'
+
+export interface AppSettings {
+  theme: ThemePreference
+  currency: CurrencyCode
+  dateFormat: DateFormatPreference
+  showCents: boolean
+  compactNumbers: boolean
+}
+
+// ---- Analytics ----
+
+export interface CategoryTrend {
+  category: Category
+  months: { month: string; total: number }[]
+  delta: number             // % change last month vs prev month
+}
+
+export interface SpendingComparison {
+  category: Category
+  thisMonth: number
+  lastMonth: number
+  delta: number             // % change
+  deltaAmount: number
+}
+
+export interface CashFlowForecast {
+  projectedBalance: number
+  remainingDays: number
+  projectedIncome: number
+  projectedExpenses: number
+  safeToSpendDaily: number
+  confidence: 'high' | 'medium' | 'low'
 }

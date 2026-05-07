@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useThemeStore } from '../store/theme'
 
-type Page = 'dashboard' | 'transactions' | 'budgets' | 'goals' | 'accounts' | 'investments'
+type Page = 'dashboard' | 'transactions' | 'budgets' | 'goals' | 'accounts' | 'investments' | 'analytics' | 'settings'
 
 interface NavItem {
   id: Page
@@ -17,6 +17,8 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'goals',        label: 'Goals',        d: 'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z' },
   { id: 'accounts',     label: 'Accounts',     d: 'M3 9a2 2 0 012-2h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9zm0 0V7a2 2 0 012-2h2M16 5H8a2 2 0 00-2 2' },
   { id: 'investments',  label: 'Investments',  d: 'M3 17l4-8 4 4 4-6 4 3' },
+  { id: 'analytics',   label: 'Analytics',    d: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
+  { id: 'settings',    label: 'Settings',     d: 'M12 15a3 3 0 100-6 3 3 0 000 6zm8.9-3a8.9 8.9 0 01-.1 1.4l2 1.6-2 3.5-2.4-.9a7 7 0 01-2.4 1.4L15.5 21h-4l-.5-2.1A7 7 0 018.6 17.5l-2.4.9-2-3.5 2-1.6A9 9 0 016.1 12a9 9 0 01.1-1.4l-2-1.6 2-3.5 2.4.9A7 7 0 0111 4.9L11.5 3h4l.5 2.1a7 7 0 012.4 1.4l2.4-.9 2 3.5-2 1.6c.1.5.1.9.1 1.3z' },
 ]
 
 function NavIcon({ d }: { d: string }) {

@@ -1,22 +1,33 @@
 import { useState } from 'react'
 import type { Transaction } from '../types'
-import { useTransactionsStore } from '../store'
+import { useTransactionsStore } from '../store/transactions'
+import { useUndoStore } from '../store/undo'
 import { Button, Modal } from '../components/ui'
 import TransactionForm from '../components/transactions/TransactionForm'
 import TransactionList from '../components/transactions/TransactionList'
+import TransactionDetailModal from '../components/transactions/TransactionDetailModal'
 
 export default function Transactions() {
   const { transactions, addTransaction, updateTransaction, deleteTransaction } = useTransactionsStore()
+  const { pushToast } = useUndoStore()
 
-  const [modalOpen, setModalOpen] = useState(false)
-  const [editing, setEditing] = useState<Transaction | null>(null)
+  const [modalOpen, setModalOpen]  = useState(false)
+  const [editing, setEditing]      = useState<Transaction | null>(null)
+  const [detailTx, setDetailTx]    = useState<Transaction | null>(null)
 
-  function openAdd() { setEditing(null); setModalOpen(true) }
+  function openAdd()                { setEditing(null); setModalOpen(true) }
   function openEdit(t: Transaction) { setEditing(t); setModalOpen(true) }
 
   function handleSubmit(data: Omit<Transaction, 'id'>) {
     if (editing) { updateTransaction(editing.id, data) } else { addTransaction(data) }
     setModalOpen(false)
+  }
+
+  function handleDelete(id: string) {
+    const tx = transactions.find((t) => t.id === id)
+    if (!tx) return
+    deleteTransaction(id)
+    pushToast(`"${tx.title}" deleted`, { type: 'DELETE_TRANSACTION', payload: tx })
   }
 
   return (
@@ -43,12 +54,24 @@ export default function Transactions() {
           <Button onClick={openAdd}>Add transaction</Button>
         </div>
       ) : (
-        <TransactionList transactions={transactions} onEdit={openEdit} onDelete={deleteTransaction} />
+        <TransactionList
+          transactions={transactions}
+          onEdit={openEdit}
+          onDelete={handleDelete}
+          onViewDetail={setDetailTx}
+        />
       )}
 
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Edit transaction' : 'Add transaction'}>
         <TransactionForm initial={editing ?? undefined} onSubmit={handleSubmit} onCancel={() => setModalOpen(false)} />
       </Modal>
+
+      <TransactionDetailModal
+        transaction={detailTx}
+        onClose={() => setDetailTx(null)}
+        onEdit={(t) => { setDetailTx(null); openEdit(t) }}
+        onDelete={(id) => { handleDelete(id); setDetailTx(null) }}
+      />
     </div>
   )
 }

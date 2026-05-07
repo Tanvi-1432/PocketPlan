@@ -1,11 +1,14 @@
 import { useState } from 'react'
 import Layout, { type Page } from './components/Layout'
+import { ToastContainer } from './components/ui'
 import Dashboard from './pages/Dashboard'
 import Transactions from './pages/Transactions'
 import Budgets from './pages/Budgets'
 import Goals from './pages/Goals'
 import Accounts from './pages/Accounts'
 import Investments from './pages/Investments'
+import Analytics from './pages/Analytics'
+import Settings from './pages/Settings'
 import './index.css'
 
 export default function App() {
@@ -19,12 +22,15 @@ export default function App() {
       case 'goals':        return <Goals />
       case 'accounts':     return <Accounts />
       case 'investments':  return <Investments />
+      case 'analytics':   return <Analytics />
+      case 'settings':    return <Settings />
     }
   }
 
   return (
     <Layout currentPage={currentPage} onNavigate={setCurrentPage}>
       {renderPage()}
+      <ToastContainer />
     </Layout>
   )
 }
