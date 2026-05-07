@@ -13,9 +13,9 @@ import {
 } from '../constants/demoData'
 
 export function useDemoData() {
-  const { transactions, upsertTransaction, deleteTransaction } = useTransactionsStore()
-  const { budgets, setBudget, deleteBudget } = useBudgetsStore()
-  const { goals, upsertGoal, deleteGoal } = useGoalsStore()
+  const { transactions, upsertTransaction } = useTransactionsStore()
+  const { budgets, setBudget } = useBudgetsStore()
+  const { goals, upsertGoal } = useGoalsStore()
   const { accounts, clearConnectedAccounts } = useAccountsStore()
   const { holdings, upsertHolding, clearHoldings } = useInvestmentsStore()
 
@@ -48,19 +48,19 @@ export function useDemoData() {
     buildDemoHoldings().forEach((h) => upsertHolding(h))
   }
 
-  // Removes only demo-prefixed entities, leaving user-created ones intact
+  // Removes only demo-prefixed entities — reads live state to avoid stale closures
   function clearDemoData() {
-    transactions
+    useTransactionsStore.getState().transactions
       .filter((t) => t.id.startsWith('demo-'))
-      .forEach((t) => deleteTransaction(t.id))
+      .forEach((t) => useTransactionsStore.getState().deleteTransaction(t.id))
 
-    budgets
+    useBudgetsStore.getState().budgets
       .filter((b) => b.id.startsWith('demo-'))
-      .forEach((b) => deleteBudget(b.id))
+      .forEach((b) => useBudgetsStore.getState().deleteBudget(b.id))
 
-    goals
+    useGoalsStore.getState().goals
       .filter((g) => g.id.startsWith('demo-'))
-      .forEach((g) => deleteGoal(g.id))
+      .forEach((g) => useGoalsStore.getState().deleteGoal(g.id))
 
     clearConnectedAccounts()
     clearHoldings()
@@ -68,9 +68,12 @@ export function useDemoData() {
 
   // Nuclear clear — removes everything including user-created data
   function clearAllData() {
-    ;[...transactions].forEach((t) => deleteTransaction(t.id))
-    ;[...budgets].forEach((b) => deleteBudget(b.id))
-    ;[...goals].forEach((g) => deleteGoal(g.id))
+    useTransactionsStore.getState().transactions
+      .forEach((t) => useTransactionsStore.getState().deleteTransaction(t.id))
+    useBudgetsStore.getState().budgets
+      .forEach((b) => useBudgetsStore.getState().deleteBudget(b.id))
+    useGoalsStore.getState().goals
+      .forEach((g) => useGoalsStore.getState().deleteGoal(g.id))
     clearConnectedAccounts()
     clearHoldings()
   }

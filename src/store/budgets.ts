@@ -5,7 +5,7 @@ import type { Budget } from '../types'
 
 interface BudgetsState {
   budgets: Budget[]
-  setBudget: (data: Omit<Budget, 'id'>) => void
+  setBudget: (data: Omit<Budget, 'id'> & { id?: string }) => void
   updateBudget: (id: string, data: Partial<Omit<Budget, 'id'>>) => void
   deleteBudget: (id: string) => void
 }
@@ -15,20 +15,22 @@ export const useBudgetsStore = create<BudgetsState>()(
     (set) => ({
       budgets: [],
 
-      // Upserts: replaces existing budget for same category+month, or adds new
+      // Upserts by category+month. Preserves the provided id if given (stable demo IDs).
       setBudget: (data) =>
         set((state) => {
           const existing = state.budgets.find(
             (b) => b.category === data.category && b.month === data.month
           )
           if (existing) {
+            const id = data.id ?? existing.id
             return {
               budgets: state.budgets.map((b) =>
-                b.id === existing.id ? { ...b, ...data } : b
+                b.id === existing.id ? { ...b, ...data, id } : b
               ),
             }
           }
-          return { budgets: [...state.budgets, { ...data, id: uuidv4() }] }
+          const id = data.id ?? uuidv4()
+          return { budgets: [...state.budgets, { ...data, id }] }
         }),
 
       updateBudget: (id, data) =>
