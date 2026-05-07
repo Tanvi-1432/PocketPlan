@@ -163,7 +163,7 @@ export default function Analytics() {
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" className="dark:stroke-slate-700" />
             <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
             <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
-            <Tooltip formatter={(v: number) => formatCurrency(v)} {...TOOLTIP_STYLE} />
+            <Tooltip formatter={(v) => formatCurrency(Number(v))} {...TOOLTIP_STYLE} />
             <Legend wrapperStyle={{ fontSize: 11 }} />
             <Bar dataKey="Income"   fill="#6366f1" radius={[3, 3, 0, 0]} />
             <Bar dataKey="Expenses" fill="#f87171" radius={[3, 3, 0, 0]} />
@@ -179,7 +179,7 @@ export default function Analytics() {
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" className="dark:stroke-slate-700" />
             <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
             <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
-            <Tooltip formatter={(v: number) => formatCurrency(v)} {...TOOLTIP_STYLE} />
+            <Tooltip formatter={(v) => formatCurrency(Number(v))} {...TOOLTIP_STYLE} />
             <Line type="monotone" dataKey="Savings" stroke="#10b981" strokeWidth={2} dot={{ r: 3, fill: '#10b981' }} />
           </LineChart>
         </ResponsiveContainer>
@@ -194,7 +194,7 @@ export default function Analytics() {
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" className="dark:stroke-slate-700" />
               <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${v}`} />
-              <Tooltip formatter={(v: number) => formatCurrency(v)} {...TOOLTIP_STYLE} />
+              <Tooltip formatter={(v) => formatCurrency(Number(v))} {...TOOLTIP_STYLE} />
               <Legend wrapperStyle={{ fontSize: 11 }} />
               {topCategories.map((cat) => (
                 <Line key={cat} type="monotone" dataKey={cat} stroke={CATEGORY_COLORS[cat]} strokeWidth={2} dot={{ r: 2 }} />

@@ -1,6 +1,5 @@
 import type { Transaction, Category, SpendingComparison, CategoryTrend, MonthlySummary } from '../types'
 import { filterByMonth, getTotalIncome, getTotalExpenses, getMonthlySummaries } from './transactions'
-import { toMonthKey } from './date'
 
 function prevMonthKey(monthKey: string): string {
   const [year, month] = monthKey.split('-').map(Number)
