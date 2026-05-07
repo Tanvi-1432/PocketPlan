@@ -1,30 +1,86 @@
-import type { Transaction, DetectedSubscription, RecurringFrequency } from '../types'
+import type { Transaction, DetectedSubscription, RecurringFrequency, Category } from '../types'
 import { addFrequencyDays } from './recurring'
 
-// Normalize merchant name to a stable key
-function normalizeKey(title: string): string {
-  return title.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 20)
+// ---------------------------------------------------------------------------
+// Known subscription merchant keywords (lowercased, stripped)
+// A transaction whose normalized key contains one of these is a strong signal.
+// ---------------------------------------------------------------------------
+const KNOWN_SUB_KEYWORDS: string[] = [
+  'netflix', 'spotify', 'hulu', 'disney', 'applemusic', 'appleone',
+  'icloud', 'youtubepremium', 'youtube', 'amazonprime', 'primevideo',
+  'adobecreative', 'adobe', 'notion', 'chatgpt', 'openai',
+  'planetfitness', 'crunchfitness', 'anytimefitness',
+  'comcast', 'xfinity', 'verizon', 'att', 'tmobile',
+  'dropbox', 'github', 'duolingo', 'calm', 'headspace',
+  'nytimes', 'wsj', 'washingtonpost', 'medium',
+  'lastpass', 'nordvpn', 'expressvpn',
+  'playstation', 'xbox', 'nintendoswitch',
+]
+
+// Categories that are never subscriptions (too variable / not services)
+const EXCLUDED_CATEGORIES = new Set<Category>([
+  'Food', 'Transport', 'Shopping', 'Salary', 'Freelance', 'Investment',
+])
+
+// ---------------------------------------------------------------------------
+// Normalize a merchant title to a stable grouping key.
+// Strips punctuation, extra words like "Premium"/"Plus", bank prefixes, etc.
+// ---------------------------------------------------------------------------
+export function normalizeMerchantKey(title: string): string {
+  return title
+    .toLowerCase()
+    // Remove common bank-statement noise prefixes
+    .replace(/^(google\s*\*|apple\s*\*|amzn\s*\*|paypal\s*\*|sq\s*\*|tst\s*\*)/g, '')
+    // Strip everything that isn't a letter or digit
+    .replace(/[^a-z0-9]/g, '')
+    // Normalise known aliases so they group together
+    .replace(/youtubepremi(um)?/, 'youtubepremium')
+    .replace(/spotifypremi(um)?/, 'spotify')
+    .replace(/netflixcom/, 'netflix')
+    .replace(/amazonprimevideo/, 'amazonprime')
+    .replace(/primevideo/, 'amazonprime')
+    .slice(0, 24)
 }
 
-// Detect approximate frequency from day-gaps between occurrences
+// Is this key a known subscription service?
+function isKnownSubscription(key: string): boolean {
+  return KNOWN_SUB_KEYWORDS.some((kw) => key.includes(kw))
+}
+
+// ---------------------------------------------------------------------------
+// Detect approximate frequency from day-gaps between consecutive charges.
+// ---------------------------------------------------------------------------
 function detectFrequency(gaps: number[]): RecurringFrequency | null {
   if (gaps.length === 0) return null
   const avg = gaps.reduce((a, b) => a + b, 0) / gaps.length
   if (avg <= 2)   return 'daily'
-  if (avg <= 9)   return 'weekly'
-  if (avg <= 19)  return 'biweekly'
-  if (avg <= 45)  return 'monthly'
+  if (avg <= 10)  return 'weekly'
+  if (avg <= 20)  return 'biweekly'
+  if (avg <= 46)  return 'monthly'   // 28–46 day window for monthly billing
   if (avg <= 400) return 'yearly'
   return null
 }
 
-export function detectSubscriptions(transactions: Transaction[]): DetectedSubscription[] {
-  const expenses = transactions.filter((t) => t.type === 'expense')
+// Amount consistency: all charges within ±15% of the group average
+function amountsAreConsistent(amounts: number[]): boolean {
+  if (amounts.length <= 1) return true
+  const avg = amounts.reduce((a, b) => a + b, 0) / amounts.length
+  return amounts.every((a) => Math.abs(a - avg) / avg <= 0.15)
+}
 
-  // Group by normalized title
+// ---------------------------------------------------------------------------
+// Main detection entry point
+// ---------------------------------------------------------------------------
+export function detectSubscriptions(transactions: Transaction[]): DetectedSubscription[] {
+  // Only look at expenses in non-excluded categories
+  const expenses = transactions.filter(
+    (t) => t.type === 'expense' && !EXCLUDED_CATEGORIES.has(t.category)
+  )
+
+  // Group by normalized merchant key
   const byKey = new Map<string, Transaction[]>()
   for (const t of expenses) {
-    const key = normalizeKey(t.title)
+    const key = normalizeMerchantKey(t.title)
     if (!byKey.has(key)) byKey.set(key, [])
     byKey.get(key)!.push(t)
   }
@@ -32,50 +88,77 @@ export function detectSubscriptions(transactions: Transaction[]): DetectedSubscr
   const subs: DetectedSubscription[] = []
 
   for (const [key, txs] of byKey) {
-    if (txs.length < 2) continue
+    const known = isKnownSubscription(key)
 
+    // Sort oldest → newest
     const sorted = [...txs].sort((a, b) => a.date.localeCompare(b.date))
 
-    // Compute day-gaps between consecutive occurrences
+    // Deduplicate by month (keep the one closest to the median day)
+    // This prevents double-counting if someone manually re-added a synced tx
+    const byMonth = new Map<string, Transaction>()
+    for (const t of sorted) {
+      const mk = t.date.slice(0, 7)
+      if (!byMonth.has(mk)) byMonth.set(mk, t)
+    }
+    const deduped = [...byMonth.values()].sort((a, b) => a.date.localeCompare(b.date))
+
+    // Minimum occurrences: 2 for known merchants, 3 for unknown ones
+    const minOccurrences = known ? 2 : 3
+    if (deduped.length < minOccurrences) continue
+
+    // Compute day-gaps between consecutive charges
     const gaps: number[] = []
-    for (let i = 1; i < sorted.length; i++) {
-      const prev = new Date(sorted[i - 1].date).getTime()
-      const curr = new Date(sorted[i].date).getTime()
-      gaps.push(Math.round((curr - prev) / (1000 * 60 * 60 * 24)))
+    for (let i = 1; i < deduped.length; i++) {
+      const prev = new Date(deduped[i - 1].date + 'T00:00:00').getTime()
+      const curr = new Date(deduped[i].date + 'T00:00:00').getTime()
+      gaps.push(Math.round((curr - prev) / 86_400_000))
     }
 
     const freq = detectFrequency(gaps)
+
+    // For unknown merchants, require a clear monthly/yearly pattern
     if (!freq) continue
+    if (!known && freq !== 'monthly' && freq !== 'yearly') continue
 
-    // Check amount consistency (within 10%)
-    const amounts = sorted.map((t) => t.amount)
-    const avgAmount = amounts.reduce((a, b) => a + b, 0) / amounts.length
-    const allConsistent = amounts.every((a) => Math.abs(a - avgAmount) / avgAmount < 0.1)
-    if (!allConsistent && sorted.length < 3) continue
+    // Amount consistency check (relaxed for known merchants)
+    const amounts = deduped.map((t) => t.amount)
+    const consistent = amountsAreConsistent(amounts)
+    if (!consistent && !known) continue
 
-    const last = sorted[sorted.length - 1]
+    const avgAmount = Math.round((amounts.reduce((a, b) => a + b, 0) / amounts.length) * 100) / 100
+    const last = deduped[deduped.length - 1]
     const nextExpected = addFrequencyDays(last.date, freq)
 
     subs.push({
       seriesKey: key,
       title: last.title,
-      amount: Math.round(avgAmount * 100) / 100,
+      amount: avgAmount,
       frequency: freq,
       lastCharged: last.date,
       nextExpected,
-      occurrences: sorted.length,
+      occurrences: deduped.length,
       category: last.category,
     })
   }
 
-  // Sort by monthly cost descending
+  // Sort by descending monthly cost
   return subs.sort((a, b) => {
-    const monthlyA = a.frequency === 'yearly' ? a.amount / 12 : a.frequency === 'weekly' ? a.amount * 4.33 : a.amount
-    const monthlyB = b.frequency === 'yearly' ? b.amount / 12 : b.frequency === 'weekly' ? b.amount * 4.33 : b.amount
-    return monthlyB - monthlyA
+    const monthly = (s: DetectedSubscription) => {
+      switch (s.frequency) {
+        case 'daily':    return s.amount * 30.44
+        case 'weekly':   return s.amount * 4.33
+        case 'biweekly': return s.amount * 2.17
+        case 'monthly':  return s.amount
+        case 'yearly':   return s.amount / 12
+      }
+    }
+    return monthly(b) - monthly(a)
   })
 }
 
+// ---------------------------------------------------------------------------
+// Monthly cost total across all detected subscriptions
+// ---------------------------------------------------------------------------
 export function monthlySubscriptionTotal(subs: DetectedSubscription[]): number {
   return subs.reduce((sum, s) => {
     switch (s.frequency) {
