@@ -170,35 +170,33 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
 
       {/* ── Hero card ─────────────────────────────────────────────────── */}
       {hasData && (
-        <div className="animate-scale-in rounded-3xl overflow-hidden hero-pastel"
+        <div className="animate-scale-in rounded-3xl overflow-hidden relative hero-pastel hero-pastel-light dark:hero-pastel-dark"
           style={{ padding: '1.5rem 1.75rem' }}>
 
-          {/* Decorative blurs inside hero */}
+          {/* Decorative orb */}
           <div className="absolute top-0 right-0 w-56 h-56 rounded-full pointer-events-none"
-            style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 70%)', transform: 'translate(25%, -25%)' }} />
+            style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.16) 0%, transparent 70%)', transform: 'translate(25%, -25%)' }} />
 
           {/* Header row */}
           <div className="relative flex items-start justify-between mb-5">
             <div>
-              <p className="text-xs font-medium tracking-widest uppercase mb-2"
-                style={{ color: 'rgba(109,40,217,0.65)' }}>
+              <p className="text-xs font-medium tracking-widest uppercase mb-2 text-violet-600 dark:text-violet-300">
                 {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                 {lastSynced && (
-                  <span className="hidden sm:inline" style={{ color: 'rgba(109,40,217,0.50)' }}>
+                  <span className="hidden sm:inline text-violet-400 dark:text-violet-400">
                     {' '}· Synced {new Date(lastSynced).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
                   </span>
                 )}
               </p>
-              <h1 className="text-3xl sm:text-4xl font-bold number-display"
-                style={{ color: 'rgba(60,20,140,0.90)', letterSpacing: '-0.03em' }}>
+              <h1 className="text-3xl sm:text-4xl font-bold number-display text-violet-900 dark:text-white"
+                style={{ letterSpacing: '-0.03em' }}>
                 {formatCurrency(totalNetWorth)}
               </h1>
-              <p className="text-sm mt-1" style={{ color: 'rgba(109,40,217,0.60)' }}>Net worth</p>
+              <p className="text-sm mt-1 text-violet-500 dark:text-violet-300">Net worth</p>
             </div>
             <button
               onClick={() => setConfirmResetOpen(true)}
-              className="text-xs transition-colors shrink-0 mt-1 underline underline-offset-2"
-              style={{ color: 'rgba(109,40,217,0.45)' }}
+              className="text-xs shrink-0 mt-1 underline underline-offset-2 text-violet-400 dark:text-violet-400 hover:text-violet-600 dark:hover:text-violet-200 transition-colors"
             >
               Reset
             </button>
@@ -207,17 +205,16 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
           {/* Metric pills */}
           <div className="relative grid grid-cols-3 gap-2 sm:gap-3">
             {[
-              { label: 'Income', value: income, textColor: 'rgba(4,120,87,0.90)' },
-              { label: 'Expenses', value: expenses, textColor: 'rgba(190,18,60,0.85)' },
-              { label: 'Balance', value: balance, textColor: 'rgba(60,20,140,0.90)' },
-            ].map(({ label, value, textColor }) => (
+              { label: 'Income',   value: income,   cls: 'text-emerald-700 dark:text-emerald-300' },
+              { label: 'Expenses', value: expenses, cls: 'text-rose-700 dark:text-rose-300'       },
+              { label: 'Balance',  value: balance,  cls: 'text-violet-900 dark:text-white'         },
+            ].map(({ label, value, cls }) => (
               <div key={label} className="rounded-2xl px-3 py-3 sm:px-4 sm:py-3.5"
-                style={{ background: 'rgba(255,255,255,0.30)', border: '1px solid rgba(255,255,255,0.50)' }}>
-                <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider mb-1.5"
-                  style={{ color: 'rgba(109,40,217,0.55)' }}>
+                style={{ background: 'rgba(255,255,255,0.28)', border: '1px solid rgba(255,255,255,0.45)' }}>
+                <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider mb-1.5 text-violet-500 dark:text-violet-300">
                   {label}
                 </p>
-                <p className="text-sm sm:text-lg font-bold number-display truncate" style={{ color: textColor }}>
+                <p className={`text-sm sm:text-lg font-bold number-display truncate ${cls}`}>
                   {value < 0 ? `-${formatCurrency(Math.abs(value))}` : formatCurrency(value)}
                 </p>
               </div>
@@ -226,26 +223,25 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
 
           {/* Forecast strip */}
           {forecast.remainingDays > 0 && (
-            <div className="relative mt-4 pt-4 flex flex-wrap gap-x-5 gap-y-1.5"
-              style={{ borderTop: '1px solid rgba(255,255,255,0.40)' }}>
+            <div className="relative mt-4 pt-4 flex flex-wrap gap-x-5 gap-y-1.5 border-t border-white/40 dark:border-white/15">
               <div className="flex items-center gap-2">
-                <span className="text-xs" style={{ color: 'rgba(109,40,217,0.55)' }}>Month-end forecast</span>
+                <span className="text-xs text-violet-500 dark:text-violet-300">Month-end forecast</span>
                 <span className={`text-sm font-bold number-display ${
-                  forecastIsPositive ? 'text-emerald-700 dark:text-emerald-400'
-                  : forecastIsWarn   ? 'text-amber-700 dark:text-amber-400'
-                                     : 'text-rose-700 dark:text-rose-400'
+                  forecastIsPositive ? 'text-emerald-700 dark:text-emerald-300'
+                  : forecastIsWarn   ? 'text-amber-700 dark:text-amber-300'
+                                     : 'text-rose-700 dark:text-rose-300'
                 }`}>
                   {formatCurrency(forecast.projectedBalance)}
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xs" style={{ color: 'rgba(109,40,217,0.55)' }}>Safe to spend</span>
-                <span className="text-sm font-bold number-display" style={{ color: 'rgba(60,20,140,0.85)' }}>
+                <span className="text-xs text-violet-500 dark:text-violet-300">Safe to spend</span>
+                <span className="text-sm font-bold number-display text-violet-900 dark:text-white">
                   {formatCurrency(forecast.safeToSpendDaily)}
-                  <span className="text-xs font-normal" style={{ color: 'rgba(109,40,217,0.50)' }}>/day</span>
+                  <span className="text-xs font-normal text-violet-400 dark:text-violet-300">/day</span>
                 </span>
               </div>
-              <span className="text-xs self-center" style={{ color: 'rgba(109,40,217,0.45)' }}>
+              <span className="text-xs self-center text-violet-400 dark:text-violet-400">
                 {forecast.remainingDays} days left
               </span>
             </div>

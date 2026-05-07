@@ -114,6 +114,13 @@ body {
 
 /* ── Hero card — pastel glass ───────────────────────────── */
 .hero-pastel {
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(255,255,255,0.45);
+  box-shadow: 0 8px 40px rgba(167,139,250,0.18), 0 2px 12px rgba(255,255,255,0.20) inset;
+}
+
+.hero-pastel-light {
   background:
     linear-gradient(
       135deg,
@@ -122,23 +129,19 @@ body {
       rgba(96,165,250,0.20)  65%,
       rgba(244,114,182,0.18) 100%
     );
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
-  border: 1px solid rgba(255,255,255,0.45);
-  box-shadow: 0 8px 40px rgba(167,139,250,0.18), 0 2px 12px rgba(255,255,255,0.20) inset;
 }
 
-.dark .hero-pastel {
+.hero-pastel-dark {
   background:
     linear-gradient(
       135deg,
-      rgba(109,40,217,0.28) 0%,
-      rgba(79,70,229,0.22)  40%,
-      rgba(37,99,235,0.18)  70%,
-      rgba(147,51,234,0.20) 100%
+      rgba(139,92,246,0.35)  0%,
+      rgba(99,102,241,0.28)  40%,
+      rgba(59,130,246,0.22)  70%,
+      rgba(167,51,234,0.28)  100%
     );
-  border: 1px solid rgba(255,255,255,0.12);
-  box-shadow: 0 8px 40px rgba(109,40,217,0.20), 0 1px 0 rgba(255,255,255,0.08) inset;
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 8px 40px rgba(139,92,246,0.25), 0 1px 0 rgba(255,255,255,0.10) inset;
 }
 
 /* ── Mobile bottom nav ──────────────────────────────────── */
