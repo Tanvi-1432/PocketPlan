@@ -139,7 +139,7 @@ export default function Layout({ currentPage, onNavigate, children }: LayoutProp
       </aside>
 
       {/* ── Mobile top bar ───────────────────────────────────────────── */}
-      <div className="md:hidden fixed top-0 inset-x-0 z-30 flex items-center justify-between px-4 h-14 mobile-topbar">
+      <div className="md:hidden fixed top-0 inset-x-0 z-30 flex items-end justify-between px-4 pb-3 mobile-topbar">
         <div className="flex items-center gap-2.5">
           <div className="w-7 h-7 rounded-xl flex items-center justify-center"
             style={{ background: 'linear-gradient(135deg, rgba(167,139,250,0.9), rgba(129,140,248,0.9))' }}>
@@ -179,9 +179,10 @@ export default function Layout({ currentPage, onNavigate, children }: LayoutProp
 
       {/* Mobile dropdown menu */}
       <div
-        className={`md:hidden fixed top-14 inset-x-0 z-30 px-3 py-2 space-y-0.5 transition-all duration-200 ease-out mobile-dropdown ${
+        className={`md:hidden fixed inset-x-0 z-30 px-3 py-2 space-y-0.5 transition-all duration-200 ease-out mobile-dropdown ${
           mobileMenuOpen ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 -translate-y-2 pointer-events-none'
         }`}
+        style={{ top: 'calc(3.5rem + var(--safe-top, 0px))' }}
       >
         {NAV_ITEMS.map((item) => (
           <button key={item.id} onClick={() => navigate(item.id)} className={navBtnClass(item.id)}>
@@ -200,10 +201,14 @@ export default function Layout({ currentPage, onNavigate, children }: LayoutProp
       </div>
 
       {/* ── Main content ─────────────────────────────────────────────── */}
-      <main className="flex-1 md:ml-[256px] pt-14 md:pt-0 min-h-screen relative z-10">
+      <main className="flex-1 md:ml-[256px] mobile-main-pt min-h-screen relative z-10">
         <div
-          className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8"
-          style={{ paddingBottom: 'calc(5.5rem + env(safe-area-inset-bottom))' }}
+          className="max-w-5xl mx-auto py-6 sm:py-8"
+          style={{
+            paddingLeft:   'calc(1rem + var(--safe-left, 0px))',
+            paddingRight:  'calc(1rem + var(--safe-right, 0px))',
+            paddingBottom: 'calc(5.5rem + var(--safe-bottom, 0px))',
+          }}
         >
           {children}
         </div>
@@ -211,7 +216,7 @@ export default function Layout({ currentPage, onNavigate, children }: LayoutProp
 
       {/* ── Mobile bottom navigation — floating pill ──────────────────── */}
       <div className="md:hidden fixed bottom-0 inset-x-0 z-30 flex justify-center"
-        style={{ paddingBottom: 'calc(12px + env(safe-area-inset-bottom))', padding: '0 16px calc(12px + env(safe-area-inset-bottom))' }}>
+        style={{ padding: '0 16px calc(12px + var(--safe-bottom, 0px))' }}>
         <nav className="pill-nav flex items-center gap-1 px-3 py-1.5">
           {MOBILE_NAV_ITEMS.map((item) => {
             const active = currentPage === item.id

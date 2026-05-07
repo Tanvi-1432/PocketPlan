@@ -61,6 +61,14 @@
     linear-gradient(160deg, #020617 0%, #0f172a 50%, #0d1526 100%);
 }
 
+/* ── Safe area variables ────────────────────────────────── */
+:root {
+  --safe-top:    env(safe-area-inset-top,    0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left:   env(safe-area-inset-left,   0px);
+  --safe-right:  env(safe-area-inset-right,  0px);
+}
+
 /* ── Base ───────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 
@@ -70,18 +78,54 @@ html {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  /* Prevent white flash behind notch/dynamic island */
+  background:
+    radial-gradient(ellipse at 10% 10%, rgba(167,139,250,0.18) 0%, transparent 38%),
+    radial-gradient(ellipse at 90% 85%, rgba(96,165,250,0.14) 0%, transparent 40%),
+    linear-gradient(160deg, #f8fafc 0%, #eef2ff 50%, #faf5ff 100%);
+  width: 100%;
+  min-height: 100%;
+}
+
+html.dark {
+  background:
+    radial-gradient(ellipse at 10% 10%, rgba(139,92,246,0.18) 0%, transparent 38%),
+    radial-gradient(ellipse at 90% 85%, rgba(59,130,246,0.14) 0%, transparent 40%),
+    linear-gradient(160deg, #020617 0%, #0f172a 50%, #0d1526 100%);
 }
 
 body {
   background: var(--page-bg);
   background-attachment: fixed;
   min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  /* Prevent white bounce/overscroll flash on iOS */
+  overscroll-behavior: none;
+}
+
+#root {
+  min-height: 100vh;
+  min-height: 100dvh;
+  isolation: isolate;
 }
 
 /* ── Page background (applied to root div) ──────────────── */
 .page-bg {
   background: var(--page-bg);
   background-attachment: fixed;
+}
+
+/* ── Mobile main content — top padding includes notch ───── */
+.mobile-main-pt {
+  padding-top: calc(3.5rem + var(--safe-top));
+}
+
+@media (min-width: 768px) {
+  .mobile-main-pt {
+    padding-top: 0;
+  }
 }
 
 /* ── Glass utilities ────────────────────────────────────── */
@@ -150,6 +194,9 @@ body {
   -webkit-backdrop-filter: blur(24px);
   background: rgba(248, 250, 252, 0.88);
   border-bottom: 1px solid rgba(226, 232, 240, 0.55);
+  /* Extend behind notch / Dynamic Island */
+  padding-top: var(--safe-top);
+  height: calc(3.5rem + var(--safe-top));
 }
 
 @variant dark {
@@ -191,18 +238,18 @@ body {
 
 /* ── Floating pill nav (mobile) ─────────────────────────── */
 .pill-nav {
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
-  border: 1px solid rgba(226, 232, 240, 0.60);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  border: 1px solid rgba(226, 232, 240, 0.65);
   border-radius: 9999px;
-  box-shadow: 0 4px 24px rgba(100, 116, 139, 0.12), 0 1px 4px rgba(100,116,139,0.08);
+  box-shadow: 0 8px 32px rgba(100, 116, 139, 0.14), 0 2px 8px rgba(100,116,139,0.08);
 }
 
 .dark .pill-nav {
-  background: rgba(10, 15, 30, 0.88);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.30);
+  background: rgba(10, 15, 30, 0.90);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.40), 0 2px 8px rgba(0,0,0,0.20);
 }
 
 /* ── Nav active state ───────────────────────────────────── */

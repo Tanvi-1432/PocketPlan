@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Layout, { type Page } from './components/Layout'
 import { ToastContainer } from './components/ui'
+import { useSettingsStore } from './store/settings'
 import Dashboard from './pages/Dashboard'
 import Transactions from './pages/Transactions'
 import Budgets from './pages/Budgets'
@@ -13,6 +14,7 @@ import './index.css'
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>('dashboard')
+  useSettingsStore() // subscribe so formatters re-run when settings change
 
   function renderPage() {
     switch (currentPage) {
