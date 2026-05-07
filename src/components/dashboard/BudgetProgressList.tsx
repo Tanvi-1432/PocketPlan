@@ -29,7 +29,7 @@ export default function BudgetProgressList({ items, onViewAll }: BudgetProgressL
           No budgets set for this month
         </CardBody>
       ) : (
-        <CardBody className="flex flex-col gap-4.5">
+        <CardBody className="flex flex-col gap-4">
           {preview.map(({ budget, spent, remaining, isOverBudget, percentUsed }) => (
             <div key={budget.id}>
               <div className="flex items-center justify-between mb-1.5">

@@ -74,12 +74,12 @@ export default function MonthlyChart({ data }: MonthlyChartProps) {
         </ResponsiveContainer>
         <div className="flex items-center gap-4 mt-3 justify-center">
           <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full" style={{ background: '#6ee7b7' }} />
-            <span className="text-xs text-slate-400 dark:text-slate-500">Income</span>
+            <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#6ee7b7' }} />
+            <span className="text-xs text-slate-500 dark:text-slate-400">Income</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full" style={{ background: '#c4b5fd' }} />
-            <span className="text-xs text-slate-400 dark:text-slate-500">Expenses</span>
+            <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#c4b5fd' }} />
+            <span className="text-xs text-slate-500 dark:text-slate-400">Expenses</span>
           </div>
         </div>
       </CardBody>

@@ -33,10 +33,30 @@ interface DashboardProps {
 }
 
 const INSIGHT_COLORS = {
-  positive: { wrapper: 'border border-emerald-200/60 dark:border-emerald-500/15', bg: 'bg-emerald-50/60 dark:bg-emerald-500/6', text: 'text-emerald-700 dark:text-emerald-300', dot: 'bg-emerald-400' },
-  negative: { wrapper: 'border border-rose-200/60 dark:border-rose-500/15',       bg: 'bg-rose-50/60 dark:bg-rose-500/6',       text: 'text-rose-700 dark:text-rose-300',     dot: 'bg-rose-400'    },
-  warning:  { wrapper: 'border border-amber-200/60 dark:border-amber-500/15',     bg: 'bg-amber-50/60 dark:bg-amber-500/6',     text: 'text-amber-700 dark:text-amber-300',   dot: 'bg-amber-400'   },
-  neutral:  { wrapper: 'border border-violet-200/60 dark:border-violet-500/15',   bg: 'bg-violet-50/60 dark:bg-violet-500/6',   text: 'text-violet-700 dark:text-violet-300', dot: 'bg-violet-400'  },
+  positive: {
+    bg: 'rgba(52,211,153,0.10)',
+    border: 'rgba(52,211,153,0.20)',
+    text: 'text-emerald-700 dark:text-emerald-300',
+    dot: '#34d399',
+  },
+  negative: {
+    bg: 'rgba(251,113,133,0.10)',
+    border: 'rgba(251,113,133,0.20)',
+    text: 'text-rose-700 dark:text-rose-300',
+    dot: '#fb7185',
+  },
+  warning: {
+    bg: 'rgba(251,191,36,0.10)',
+    border: 'rgba(251,191,36,0.20)',
+    text: 'text-amber-700 dark:text-amber-300',
+    dot: '#fbbf24',
+  },
+  neutral: {
+    bg: 'rgba(167,139,250,0.10)',
+    border: 'rgba(167,139,250,0.20)',
+    text: 'text-violet-700 dark:text-violet-300',
+    dot: '#a78bfa',
+  },
 }
 
 const DISMISSED_KEY = 'pocketplan-onboarding-dismissed'
@@ -83,6 +103,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
     localStorage.setItem(DISMISSED_KEY, 'true')
     setOnboardingDismissed(true)
   }
+
   function handleLoadDemo() {
     loadDemoData()
     handleDismissOnboarding()
@@ -90,41 +111,46 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
 
   const showOnboarding = !hasData && !onboardingDismissed
 
-  const forecastTextColor =
-    forecast.projectedBalance >= 1000 ? 'text-emerald-600 dark:text-emerald-400' :
-    forecast.projectedBalance >= 0    ? 'text-amber-600 dark:text-amber-400' :
-                                        'text-rose-500 dark:text-rose-400'
+  const forecastIsPositive = forecast.projectedBalance >= 1000
+  const forecastIsWarn     = forecast.projectedBalance >= 0 && forecast.projectedBalance < 1000
 
   return (
     <div className="flex flex-col gap-5">
 
-      {/* ── Onboarding card ─────────────────────────────────────────────── */}
+      {/* ── Onboarding ────────────────────────────────────────────────── */}
       {showOnboarding && (
-        <div className="hero-glass p-6 sm:p-8 animate-scale-in">
+        <div className="animate-scale-in rounded-3xl overflow-hidden p-6 sm:p-8"
+          style={{
+            background: 'linear-gradient(135deg, rgba(167,139,250,0.28), rgba(129,140,248,0.22), rgba(96,165,250,0.20))',
+            backdropFilter: 'blur(28px)',
+            WebkitBackdropFilter: 'blur(28px)',
+            border: '1px solid rgba(255,255,255,0.50)',
+            boxShadow: '0 8px 40px rgba(167,139,250,0.18)',
+          }}>
           <div className="flex flex-col sm:flex-row sm:items-center gap-6">
             <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0"
-              style={{ background: 'rgba(167,139,250,0.20)', border: '1px solid rgba(167,139,250,0.30)' }}>
-              <svg className="w-7 h-7 text-violet-600 dark:text-violet-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round">
+              style={{ background: 'rgba(255,255,255,0.30)', border: '1px solid rgba(255,255,255,0.50)' }}>
+              <svg className="w-7 h-7 text-violet-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 2a10 10 0 100 20A10 10 0 0012 2zm0 6v4l3 3" />
               </svg>
             </div>
             <div className="flex-1">
-              <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100">Welcome to PocketPlan</h2>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-lg">
-                Explore a premium personal finance dashboard with budgets, transactions, accounts, and investments. No real data required.
+              <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Welcome to PocketPlan</h2>
+              <p className="text-sm text-slate-600 dark:text-slate-300 mt-1 max-w-lg">
+                Explore a premium personal finance dashboard with budgets, transactions, accounts, and investments.
               </p>
               <div className="flex flex-wrap gap-3 mt-4">
                 <button
                   onClick={handleLoadDemo}
-                  className="px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-150 active:scale-[0.97]"
-                  style={{ background: 'rgba(109,40,217,0.85)', color: '#fff', boxShadow: '0 4px 16px rgba(139,92,246,0.25)' }}
+                  className="px-4 py-2 rounded-2xl text-sm font-semibold transition-all duration-150 active:scale-[0.97]"
+                  style={{ background: 'rgba(255,255,255,0.75)', color: '#6d28d9', border: '1px solid rgba(255,255,255,0.80)', boxShadow: '0 2px 12px rgba(167,139,250,0.15)' }}
                 >
                   Load demo experience
                 </button>
                 <button
                   onClick={handleDismissOnboarding}
-                  className="px-4 py-2 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 active:scale-[0.97] transition-all duration-150"
-                  style={{ background: 'rgba(255,255,255,0.50)', border: '1px solid rgba(200,200,230,0.40)' }}
+                  className="px-4 py-2 rounded-2xl text-sm font-medium text-slate-600 dark:text-slate-300 transition-all duration-150 active:scale-[0.97]"
+                  style={{ background: 'rgba(255,255,255,0.25)', border: '1px solid rgba(255,255,255,0.40)' }}
                 >
                   Start empty
                 </button>
@@ -134,59 +160,64 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
         </div>
       )}
 
-      {/* Load demo prompt (minimal) */}
+      {/* Minimal no-data prompt */}
       {!hasData && onboardingDismissed && (
-        <div className="card flex items-center justify-between px-5 py-4">
+        <div className="flex items-center justify-between glass-card px-5 py-4">
           <p className="text-sm text-slate-600 dark:text-slate-300">No data yet. Want to explore with sample data?</p>
           <Button variant="secondary" size="sm" onClick={loadDemoData}>Load demo data</Button>
         </div>
       )}
 
-      {/* ── Hero card ────────────────────────────────────────────────────── */}
+      {/* ── Hero card ─────────────────────────────────────────────────── */}
       {hasData && (
-        <div className="hero-glass px-6 sm:px-7 pt-6 pb-5 animate-scale-in relative overflow-hidden">
-          {/* Subtle inner highlight */}
-          <div className="pointer-events-none absolute inset-0 rounded-[1.75rem]"
-            style={{ background: 'radial-gradient(ellipse 60% 40% at 80% 20%, rgba(255,255,255,0.18), transparent)' }} />
+        <div className="animate-scale-in rounded-3xl overflow-hidden hero-pastel"
+          style={{ padding: '1.5rem 1.75rem' }}>
+
+          {/* Decorative blurs inside hero */}
+          <div className="absolute top-0 right-0 w-56 h-56 rounded-full pointer-events-none"
+            style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 70%)', transform: 'translate(25%, -25%)' }} />
 
           {/* Header row */}
-          <div className="flex items-start justify-between mb-5">
+          <div className="relative flex items-start justify-between mb-5">
             <div>
-              <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">
+              <p className="text-xs font-medium tracking-widest uppercase mb-2"
+                style={{ color: 'rgba(109,40,217,0.65)' }}>
                 {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                 {lastSynced && (
-                  <span className="hidden sm:inline">
+                  <span className="hidden sm:inline" style={{ color: 'rgba(109,40,217,0.50)' }}>
                     {' '}· Synced {new Date(lastSynced).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
                   </span>
                 )}
               </p>
-              <p className="text-3xl sm:text-4xl font-bold number-display text-slate-800 dark:text-slate-100 leading-none">
+              <h1 className="text-3xl sm:text-4xl font-bold number-display"
+                style={{ color: 'rgba(60,20,140,0.90)', letterSpacing: '-0.03em' }}>
                 {formatCurrency(totalNetWorth)}
-              </p>
-              <p className="text-xs text-slate-400 dark:text-slate-500 mt-1.5">Net worth</p>
+              </h1>
+              <p className="text-sm mt-1" style={{ color: 'rgba(109,40,217,0.60)' }}>Net worth</p>
             </div>
             <button
               onClick={() => setConfirmResetOpen(true)}
-              className="text-xs text-slate-400 hover:text-rose-400 dark:hover:text-rose-400 transition-colors mt-1 shrink-0"
+              className="text-xs transition-colors shrink-0 mt-1 underline underline-offset-2"
+              style={{ color: 'rgba(109,40,217,0.45)' }}
             >
               Reset
             </button>
           </div>
 
           {/* Metric pills */}
-          <div className="grid grid-cols-3 gap-2 sm:gap-3">
+          <div className="relative grid grid-cols-3 gap-2 sm:gap-3">
             {[
-              { label: 'Income',   value: income,   dotColor: '#34d399' },
-              { label: 'Expenses', value: expenses,  dotColor: '#f87171' },
-              { label: 'Balance',  value: balance,   dotColor: '#a78bfa' },
-            ].map(({ label, value, dotColor }) => (
+              { label: 'Income', value: income, textColor: 'rgba(4,120,87,0.90)' },
+              { label: 'Expenses', value: expenses, textColor: 'rgba(190,18,60,0.85)' },
+              { label: 'Balance', value: balance, textColor: 'rgba(60,20,140,0.90)' },
+            ].map(({ label, value, textColor }) => (
               <div key={label} className="rounded-2xl px-3 py-3 sm:px-4 sm:py-3.5"
-                style={{ background: 'rgba(255,255,255,0.28)', border: '1px solid rgba(255,255,255,0.40)' }}>
-                <div className="flex items-center gap-1.5 mb-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: dotColor }} />
-                  <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">{label}</p>
-                </div>
-                <p className="text-sm sm:text-lg font-bold number-display text-slate-800 dark:text-slate-100 truncate">
+                style={{ background: 'rgba(255,255,255,0.30)', border: '1px solid rgba(255,255,255,0.50)' }}>
+                <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider mb-1.5"
+                  style={{ color: 'rgba(109,40,217,0.55)' }}>
+                  {label}
+                </p>
+                <p className="text-sm sm:text-lg font-bold number-display truncate" style={{ color: textColor }}>
                   {value < 0 ? `-${formatCurrency(Math.abs(value))}` : formatCurrency(value)}
                 </p>
               </div>
@@ -195,90 +226,95 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
 
           {/* Forecast strip */}
           {forecast.remainingDays > 0 && (
-            <div className="mt-4 pt-4 flex flex-wrap gap-x-5 gap-y-1"
-              style={{ borderTop: '1px solid rgba(200,200,230,0.30)' }}>
-              <div className="flex items-baseline gap-1.5">
-                <span className="text-[11px] text-slate-400 dark:text-slate-500">Projected:</span>
-                <span className={`text-sm font-semibold number-display ${forecastTextColor}`}>
+            <div className="relative mt-4 pt-4 flex flex-wrap gap-x-5 gap-y-1.5"
+              style={{ borderTop: '1px solid rgba(255,255,255,0.40)' }}>
+              <div className="flex items-center gap-2">
+                <span className="text-xs" style={{ color: 'rgba(109,40,217,0.55)' }}>Month-end forecast</span>
+                <span className={`text-sm font-bold number-display ${
+                  forecastIsPositive ? 'text-emerald-700 dark:text-emerald-400'
+                  : forecastIsWarn   ? 'text-amber-700 dark:text-amber-400'
+                                     : 'text-rose-700 dark:text-rose-400'
+                }`}>
                   {formatCurrency(forecast.projectedBalance)}
                 </span>
               </div>
-              <div className="flex items-baseline gap-1.5">
-                <span className="text-[11px] text-slate-400 dark:text-slate-500">Safe/day:</span>
-                <span className="text-sm font-semibold number-display text-slate-700 dark:text-slate-200">
+              <div className="flex items-center gap-2">
+                <span className="text-xs" style={{ color: 'rgba(109,40,217,0.55)' }}>Safe to spend</span>
+                <span className="text-sm font-bold number-display" style={{ color: 'rgba(60,20,140,0.85)' }}>
                   {formatCurrency(forecast.safeToSpendDaily)}
+                  <span className="text-xs font-normal" style={{ color: 'rgba(109,40,217,0.50)' }}>/day</span>
                 </span>
               </div>
-              <span className="text-[11px] text-slate-400 dark:text-slate-500 self-end">{forecast.remainingDays}d left · {forecast.confidence}</span>
+              <span className="text-xs self-center" style={{ color: 'rgba(109,40,217,0.45)' }}>
+                {forecast.remainingDays} days left
+              </span>
             </div>
           )}
         </div>
       )}
 
-      {/* Page title when no hero (empty state) */}
+      {/* Fallback page title */}
       {!hasData && (
         <div>
-          <h1 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">Dashboard</h1>
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Dashboard</h1>
           <p className="text-sm text-slate-400 dark:text-slate-500 mt-0.5">
             {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
           </p>
         </div>
       )}
 
-      {/* ── Net worth breakdown ──────────────────────────────────────────── */}
+      {/* ── Net worth breakdown ───────────────────────────────────────── */}
       {accounts.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 animate-slide-up">
           {[
-            { label: 'Cash',        value: netWorth.cash,                                                                    accent: '#a78bfa', iconD: 'M3 9a2 2 0 012-2h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9zm0 0V7a2 2 0 012-2h2M16 5H8a2 2 0 00-2 2' },
-            { label: 'Investments', value: portfolioValue || netWorth.investments,                                            accent: '#60a5fa', iconD: 'M3 17l4-8 4 4 4-6 4 3' },
-            { label: 'Credit Debt', value: netWorth.creditCardDebt,                                                          accent: '#f87171', iconD: 'M1 6h22v13a2 2 0 01-2 2H3a2 2 0 01-2-2V6zm0 5h22' },
-            { label: 'Net Worth',   value: netWorth.cash + (portfolioValue || netWorth.investments) - netWorth.creditCardDebt, accent: '#34d399', iconD: 'M12 20V10M18 20V4M6 20v-4' },
-          ].map(({ label, value, accent, iconD }) => (
-            <div key={label} className="card px-4 py-3.5">
+            { label: 'Cash',        value: netWorth.cash,                                                          accentBg: 'rgba(148,163,184,0.12)', accentBorder: 'rgba(148,163,184,0.22)', accentIcon: '#94a3b8', textColor: 'text-slate-700 dark:text-slate-200', iconD: 'M3 9a2 2 0 012-2h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9zm0 0V7a2 2 0 012-2h2M16 5H8a2 2 0 00-2 2' },
+            { label: 'Investments', value: portfolioValue || netWorth.investments,                                 accentBg: 'rgba(129,140,248,0.14)', accentBorder: 'rgba(129,140,248,0.25)', accentIcon: '#6366f1', textColor: 'text-indigo-700 dark:text-indigo-300', iconD: 'M3 17l4-8 4 4 4-6 4 3' },
+            { label: 'Credit Debt', value: netWorth.creditCardDebt,                                               accentBg: 'rgba(251,113,133,0.12)', accentBorder: 'rgba(251,113,133,0.22)', accentIcon: '#f43f5e', textColor: 'text-rose-600 dark:text-rose-400',   iconD: 'M1 6h22v13a2 2 0 01-2 2H3a2 2 0 01-2-2V6zm0 5h22' },
+            { label: 'Net Worth',   value: netWorth.cash + (portfolioValue || netWorth.investments) - netWorth.creditCardDebt, accentBg: 'rgba(52,211,153,0.12)', accentBorder: 'rgba(52,211,153,0.22)', accentIcon: '#10b981', textColor: 'text-emerald-700 dark:text-emerald-300', iconD: 'M12 20V10M18 20V4M6 20v-4' },
+          ].map(({ label, value, accentBg, accentBorder, accentIcon, textColor, iconD }) => (
+            <div key={label} className="glass-card hover-lift px-4 py-3.5">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">{label}</p>
-                <div className="w-6 h-6 rounded-xl flex items-center justify-center" style={{ background: `${accent}18` }}>
-                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+                <p className="text-xs text-slate-400 dark:text-slate-500">{label}</p>
+                <div className="w-6 h-6 rounded-xl flex items-center justify-center shrink-0"
+                  style={{ backgroundColor: accentBg, border: `1px solid ${accentBorder}`, color: accentIcon }}>
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
                     <path d={iconD} />
                   </svg>
                 </div>
               </div>
-              <p className="text-base font-bold number-display text-slate-800 dark:text-slate-100">{formatCurrency(value)}</p>
+              <p className={`text-base font-bold number-display ${textColor}`}>{formatCurrency(value)}</p>
             </div>
           ))}
         </div>
       )}
 
-      {/* Monthly summary cards when no hero */}
+      {/* Monthly summary cards (only when no hero) */}
       {!hasData && (
         <div className="grid grid-cols-3 gap-3 sm:gap-4">
-          <SummaryCard label="Income"   amount={income}   variant="income" />
+          <SummaryCard label="Income" amount={income} variant="income" />
           <SummaryCard label="Expenses" amount={expenses} variant="expense" />
-          <SummaryCard label="Balance"  amount={balance}  variant="balance" />
+          <SummaryCard label="Balance" amount={balance} variant="balance" />
         </div>
       )}
 
-      {/* ── Month-over-month ─────────────────────────────────────────────── */}
+      {/* ── Month-over-month ──────────────────────────────────────────── */}
       {comparisons.length > 0 && (
         <section className="animate-slide-up stagger-1">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Spending vs Last Month</h2>
+            <h2 className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Spending vs Last Month</h2>
             <button onClick={() => onNavigate('analytics')} className="text-xs text-violet-500 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
-              Analytics →
+              Full analytics →
             </button>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             {comparisons.map((c) => {
               const up = c.delta > 0
               const neutral = Math.abs(c.delta) < 1
               return (
-                <div key={c.category} className="card px-4 py-3.5">
-                  <p className="text-xs text-slate-400 dark:text-slate-500 mb-1">{c.category}</p>
-                  <p className="text-sm font-semibold number-display text-slate-800 dark:text-slate-200">{formatCurrency(c.thisMonth)}</p>
-                  <span className={`text-xs font-medium mt-0.5 block ${
-                    neutral ? 'text-slate-400' :
-                    up ? 'text-rose-500 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'
-                  }`}>
+                <div key={c.category} className="glass-card px-4 py-3.5">
+                  <p className="text-xs text-slate-400 dark:text-slate-500">{c.category}</p>
+                  <p className="text-sm font-semibold number-display text-slate-700 dark:text-slate-200 mt-0.5">{formatCurrency(c.thisMonth)}</p>
+                  <span className={`text-xs font-medium ${neutral ? 'text-slate-400' : up ? 'text-rose-500 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
                     {neutral ? 'No change' : `${up ? '↑' : '↓'} ${Math.abs(c.delta).toFixed(0)}% vs last month`}
                   </span>
                 </div>
@@ -288,17 +324,19 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
         </section>
       )}
 
-      {/* ── Insights ─────────────────────────────────────────────────────── */}
+      {/* ── Insights ──────────────────────────────────────────────────── */}
       {insights.length > 0 && (
         <section className="animate-slide-up stagger-2">
-          <h2 className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3">Monthly Insights</h2>
+          <h2 className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-3">Monthly Insights</h2>
           <div className="flex flex-col gap-2">
             {insights.map((insight) => {
               const c = INSIGHT_COLORS[insight.type]
               return (
-                <div key={insight.id} className={`flex items-start gap-3 rounded-2xl px-4 py-3 ${c.bg} ${c.wrapper}`}>
-                  <span className={`mt-1.5 w-1.5 h-1.5 rounded-full shrink-0 ${c.dot}`} />
-                  <p className={`text-sm ${c.text}`}>{insight.text}</p>
+                <div key={insight.id}
+                  className={`flex items-start gap-3 rounded-2xl px-4 py-3 ${c.text}`}
+                  style={{ background: c.bg, border: `1px solid ${c.border}` }}>
+                  <span className="mt-1.5 w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: c.dot }} />
+                  <p className="text-sm">{insight.text}</p>
                 </div>
               )
             })}
@@ -306,23 +344,23 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
         </section>
       )}
 
-      {/* ── Charts ───────────────────────────────────────────────────────── */}
+      {/* ── Charts ────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-slide-up stagger-3">
         <CategoryChart data={categoryData} />
         <MonthlyChart data={monthlyChartData} />
       </div>
 
-      {/* ── Recent activity ──────────────────────────────────────────────── */}
+      {/* ── Recent activity ───────────────────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-slide-up stagger-4">
         <RecentTransactions transactions={recentTransactions} onViewAll={() => onNavigate('transactions')} />
         <BudgetProgressList items={budgetProgress} onViewAll={() => onNavigate('budgets')} />
       </div>
 
-      {/* ── Reset modal ──────────────────────────────────────────────────── */}
+      {/* ── Reset modal ───────────────────────────────────────────────── */}
       <Modal isOpen={confirmResetOpen} onClose={() => setConfirmResetOpen(false)} title="Reset demo data?">
         <div className="flex flex-col gap-5">
           <p className="text-sm text-slate-600 dark:text-slate-300">
-            This will remove all demo transactions, budgets, goals, accounts, and investment holdings. Any entries you created manually will also be cleared.
+            This will remove all demo transactions, budgets, goals, accounts, and investment holdings.
           </p>
           <div className="flex gap-3 justify-end">
             <Button variant="secondary" onClick={() => setConfirmResetOpen(false)}>Cancel</Button>

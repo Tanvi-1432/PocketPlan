@@ -72,7 +72,7 @@ function GradeCircle({ score, grade }: { score: number; grade: string }) {
   )
 }
 
-const cardClass = 'card p-6'
+const cardClass = 'glass-card p-6'
 
 export default function Analytics() {
   const { transactions } = useTransactionsStore()
@@ -148,10 +148,10 @@ export default function Analytics() {
                     style={{
                       width: `${f.score}%`,
                       background: f.score >= 70
-                        ? 'linear-gradient(90deg, #059669, #10b981)'
+                        ? 'linear-gradient(90deg, #6ee7b7, #a7f3d0)'
                         : f.score >= 40
-                        ? 'linear-gradient(90deg, #d97706, #f59e0b)'
-                        : 'linear-gradient(90deg, #dc2626, #ef4444)',
+                        ? 'linear-gradient(90deg, #fcd34d, #fde68a)'
+                        : 'linear-gradient(90deg, #fca5a5, #fecdd3)',
                     }}
                   />
                 </div>

@@ -26,21 +26,17 @@ export default function Select({
   return (
     <div className="flex flex-col gap-1.5">
       {label && (
-        <label htmlFor={selectId} className="text-sm font-medium text-slate-600 dark:text-slate-300">
+        <label htmlFor={selectId} className="text-sm font-medium text-slate-700 dark:text-slate-300">
           {label}
         </label>
       )}
       <select
         id={selectId}
-        className={`w-full rounded-xl px-3.5 py-2.5 text-sm text-slate-800 dark:text-slate-100 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-violet-400/40 ${
-          error ? 'border border-rose-300 dark:border-rose-500/40' : ''
+        className={`w-full rounded-xl border px-3.5 py-2.5 text-sm text-slate-900 dark:text-slate-100 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-400 dark:focus:border-indigo-500 ${
+          error
+            ? 'border-red-400 bg-red-50/80 dark:bg-red-500/8 dark:border-red-500/50'
+            : 'border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 hover:border-slate-300 dark:hover:border-white/15'
         } ${className}`}
-        style={error ? {} : {
-          background: 'rgba(255,255,255,0.55)',
-          border: '1px solid rgba(200,200,230,0.45)',
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
-        }}
         {...props}
       >
         {placeholder && (
@@ -54,7 +50,7 @@ export default function Select({
           </option>
         ))}
       </select>
-      {error && <p className="text-xs text-rose-500 dark:text-rose-400">{error}</p>}
+      {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
     </div>
   )
 }
