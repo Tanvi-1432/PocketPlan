@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useThemeStore } from '../store/theme'
+import { useNavVisibility } from '../hooks'
 
 type Page = 'dashboard' | 'transactions' | 'budgets' | 'goals' | 'accounts' | 'investments' | 'analytics' | 'settings'
 
@@ -69,6 +70,7 @@ interface LayoutProps {
 
 export default function Layout({ currentPage, onNavigate, children }: LayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const navVisible = useNavVisibility(currentPage)
 
   function navigate(page: Page) {
     onNavigate(page)
@@ -215,8 +217,10 @@ export default function Layout({ currentPage, onNavigate, children }: LayoutProp
       </main>
 
       {/* ── Mobile bottom navigation — floating pill ──────────────────── */}
-      <div className="md:hidden fixed bottom-0 inset-x-0 z-30 flex justify-center"
-        style={{ padding: '0 16px calc(12px + var(--safe-bottom, 0px))' }}>
+      <div
+        className={`md:hidden fixed bottom-0 inset-x-0 z-30 flex justify-center pill-nav-container ${navVisible ? '' : 'pill-nav-hidden'}`}
+        style={{ padding: '0 16px calc(12px + var(--safe-bottom, 0px))' }}
+      >
         <nav className="pill-nav flex items-center gap-1 px-3 py-1.5">
           {MOBILE_NAV_ITEMS.map((item) => {
             const active = currentPage === item.id

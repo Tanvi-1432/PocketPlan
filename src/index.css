@@ -242,6 +242,25 @@ body {
 }
 
 /* ── Floating pill nav (mobile) ─────────────────────────── */
+.pill-nav-container {
+  transition: transform 220ms ease, opacity 220ms ease;
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.pill-nav-hidden {
+  transform: translateY(calc(100% + 24px + var(--safe-bottom, 0px)));
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pill-nav-container {
+    transition: none;
+  }
+}
+
 .pill-nav {
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(32px);
@@ -251,10 +270,12 @@ body {
   box-shadow: 0 8px 32px rgba(100, 116, 139, 0.14), 0 2px 8px rgba(100,116,139,0.08);
 }
 
-.dark .pill-nav {
-  background: rgba(10, 15, 30, 0.90);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.40), 0 2px 8px rgba(0,0,0,0.20);
+@variant dark {
+  .pill-nav {
+    background: rgba(10, 15, 30, 0.90);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.40), 0 2px 8px rgba(0,0,0,0.20);
+  }
 }
 
 /* ── Nav active state ───────────────────────────────────── */
@@ -263,9 +284,11 @@ body {
   box-shadow: 0 0 0 1px rgba(167, 139, 250, 0.25);
 }
 
-.dark .nav-pill-active {
-  background: rgba(139, 92, 246, 0.18);
-  box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.30);
+@variant dark {
+  .nav-pill-active {
+    background: rgba(139, 92, 246, 0.18);
+    box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.30);
+  }
 }
 
 /* ── Premium number display ─────────────────────────────── */
