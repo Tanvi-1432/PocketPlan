@@ -103,11 +103,16 @@ body {
   padding: 0;
   /* Prevent white bounce/overscroll flash on iOS */
   overscroll-behavior: none;
+  /* Prevent any child from blowing out horizontal layout */
+  overflow-x: hidden;
+  position: relative;
 }
 
 #root {
+  width: 100%;
   min-height: 100vh;
   min-height: 100dvh;
+  overflow-x: hidden;
   isolation: isolate;
 }
 

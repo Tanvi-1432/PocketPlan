@@ -201,9 +201,9 @@ export default function Layout({ currentPage, onNavigate, children }: LayoutProp
       </div>
 
       {/* ── Main content ─────────────────────────────────────────────── */}
-      <main className="flex-1 md:ml-[256px] mobile-main-pt min-h-screen relative z-10">
+      <main className="flex-1 md:ml-[256px] mobile-main-pt min-h-screen relative z-10 w-full overflow-x-hidden">
         <div
-          className="max-w-5xl mx-auto py-6 sm:py-8"
+          className="w-full max-w-5xl mx-auto py-6 sm:py-8"
           style={{
             paddingLeft:   'calc(1rem + var(--safe-left, 0px))',
             paddingRight:  'calc(1rem + var(--safe-right, 0px))',
