@@ -139,8 +139,7 @@ export default function Layout({ currentPage, onNavigate, children }: LayoutProp
       </aside>
 
       {/* ── Mobile top bar ───────────────────────────────────────────── */}
-      <div className="md:hidden fixed top-0 inset-x-0 z-30 flex items-center justify-between px-4 h-14"
-        style={{ backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', background: 'rgba(248,250,252,0.80)', borderBottom: '1px solid rgba(226,232,240,0.50)' }}>
+      <div className="md:hidden fixed top-0 inset-x-0 z-30 flex items-center justify-between px-4 h-14 mobile-topbar">
         <div className="flex items-center gap-2.5">
           <div className="w-7 h-7 rounded-xl flex items-center justify-center"
             style={{ background: 'linear-gradient(135deg, rgba(167,139,250,0.9), rgba(129,140,248,0.9))' }}>
@@ -180,10 +179,9 @@ export default function Layout({ currentPage, onNavigate, children }: LayoutProp
 
       {/* Mobile dropdown menu */}
       <div
-        className={`md:hidden fixed top-14 inset-x-0 z-30 px-3 py-2 space-y-0.5 transition-all duration-200 ease-out ${
+        className={`md:hidden fixed top-14 inset-x-0 z-30 px-3 py-2 space-y-0.5 transition-all duration-200 ease-out mobile-dropdown ${
           mobileMenuOpen ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 -translate-y-2 pointer-events-none'
         }`}
-        style={{ backdropFilter: 'blur(28px)', WebkitBackdropFilter: 'blur(28px)', background: 'rgba(250,251,255,0.92)', borderBottom: '1px solid rgba(226,232,240,0.50)' }}
       >
         {NAV_ITEMS.map((item) => (
           <button key={item.id} onClick={() => navigate(item.id)} className={navBtnClass(item.id)}>
