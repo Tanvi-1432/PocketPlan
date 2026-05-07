@@ -33,26 +33,11 @@ interface DashboardProps {
 }
 
 const INSIGHT_COLORS = {
-  positive: { bg: 'bg-emerald-50 dark:bg-emerald-950/40', text: 'text-emerald-800 dark:text-emerald-300', dot: 'bg-emerald-400' },
-  negative: { bg: 'bg-red-50 dark:bg-red-950/40',         text: 'text-red-800 dark:text-red-300',         dot: 'bg-red-400'     },
-  warning:  { bg: 'bg-amber-50 dark:bg-amber-950/40',     text: 'text-amber-800 dark:text-amber-300',     dot: 'bg-amber-400'   },
-  neutral:  { bg: 'bg-indigo-50 dark:bg-indigo-950/40',   text: 'text-indigo-800 dark:text-indigo-300',   dot: 'bg-indigo-400'  },
+  positive: { bg: 'bg-emerald-50/80 dark:bg-emerald-500/8 border border-emerald-100 dark:border-emerald-500/15', text: 'text-emerald-800 dark:text-emerald-300', dot: 'bg-emerald-400' },
+  negative: { bg: 'bg-red-50/80 dark:bg-red-500/8 border border-red-100 dark:border-red-500/15',                 text: 'text-red-800 dark:text-red-300',         dot: 'bg-red-400'     },
+  warning:  { bg: 'bg-amber-50/80 dark:bg-amber-500/8 border border-amber-100 dark:border-amber-500/15',         text: 'text-amber-800 dark:text-amber-300',     dot: 'bg-amber-400'   },
+  neutral:  { bg: 'bg-indigo-50/80 dark:bg-indigo-500/8 border border-indigo-100 dark:border-indigo-500/15',     text: 'text-indigo-800 dark:text-indigo-300',   dot: 'bg-indigo-400'  },
 }
-
-function NetIcon({ d }: { d: string }) {
-  return (
-    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-      <path d={d} />
-    </svg>
-  )
-}
-
-const NET_WORTH_CARDS = [
-  { label: 'Cash',        key: 'cash' as const,          color: 'text-slate-900 dark:text-slate-100',    iconColor: 'text-slate-500 bg-slate-100 dark:bg-slate-800 dark:text-slate-400',       icon: <NetIcon d="M3 9a2 2 0 012-2h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9zm0 0V7a2 2 0 012-2h2M16 5H8a2 2 0 00-2 2" /> },
-  { label: 'Investments', key: 'investments' as const,    color: 'text-indigo-700 dark:text-indigo-300',  iconColor: 'text-indigo-600 bg-indigo-50 dark:bg-indigo-950/50 dark:text-indigo-400', icon: <NetIcon d="M3 17l4-8 4 4 4-6 4 3" /> },
-  { label: 'Credit Debt', key: 'creditCardDebt' as const, color: 'text-red-600 dark:text-red-400',        iconColor: 'text-red-500 bg-red-50 dark:bg-red-950/50 dark:text-red-400',           icon: <NetIcon d="M1 6h22v13a2 2 0 01-2 2H3a2 2 0 01-2-2V6zm0 5h22" /> },
-  { label: 'Net Worth',   key: 'netWorth' as const,       color: 'text-emerald-700 dark:text-emerald-300', iconColor: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/50 dark:text-emerald-400', icon: <NetIcon d="M12 20V10M18 20V4M6 20v-4" /> },
-]
 
 const DISMISSED_KEY = 'pocketplan-onboarding-dismissed'
 
@@ -92,12 +77,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
       }, null)
     : null
 
-  const netWorthValues = {
-    cash: netWorth.cash,
-    investments: portfolioValue || netWorth.investments,
-    creditCardDebt: netWorth.creditCardDebt,
-    netWorth: netWorth.netWorth,
-  }
+  const totalNetWorth = netWorth.cash + (portfolioValue || netWorth.investments) - netWorth.creditCardDebt
 
   function handleDismissOnboarding() {
     localStorage.setItem(DISMISSED_KEY, 'true')
@@ -112,129 +92,186 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
   const showOnboarding = !hasData && !onboardingDismissed
 
   const forecastColor =
-    forecast.projectedBalance >= 1000 ? 'text-emerald-600 dark:text-emerald-400' :
-    forecast.projectedBalance >= 0    ? 'text-amber-600 dark:text-amber-400' :
-                                        'text-red-500 dark:text-red-400'
-
-  const forecastBg =
-    forecast.projectedBalance >= 1000 ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-100 dark:border-emerald-900/50' :
-    forecast.projectedBalance >= 0    ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-100 dark:border-amber-900/50' :
-                                        'bg-red-50 dark:bg-red-950/40 border-red-100 dark:border-red-900/50'
+    forecast.projectedBalance >= 1000 ? 'text-emerald-400' :
+    forecast.projectedBalance >= 0    ? 'text-amber-400' :
+                                        'text-red-400'
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Page header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Dashboard</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-            {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-            {lastSynced && (
-              <span className="hidden sm:inline text-slate-400 dark:text-slate-500">
-                {' '}· Synced {new Date(lastSynced).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
-              </span>
-            )}
-          </p>
-        </div>
-        {hasData && (
-          <button
-            onClick={() => setConfirmResetOpen(true)}
-            className="text-xs text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 transition-colors underline underline-offset-2 self-start sm:self-auto"
-          >
-            Reset demo data
-          </button>
-        )}
-      </div>
 
-      {/* First-time onboarding */}
+      {/* ── Onboarding ──────────────────────────────────────────────────── */}
       {showOnboarding && (
-        <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-950/60 dark:to-indigo-900/30 border border-indigo-200 dark:border-indigo-800 rounded-2xl p-6 sm:p-8">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-6">
-            <div className="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center shrink-0">
+        <div className="relative overflow-hidden rounded-2xl p-6 sm:p-8 animate-scale-in"
+          style={{ background: 'linear-gradient(135deg, #312e81 0%, #4338ca 40%, #6d28d9 100%)' }}>
+          <div className="absolute inset-0 opacity-20"
+            style={{ backgroundImage: 'radial-gradient(circle at 70% 30%, #818cf8 0%, transparent 60%)' }} />
+          <div className="relative flex flex-col sm:flex-row sm:items-center gap-6">
+            <div className="w-14 h-14 rounded-2xl bg-white/15 border border-white/20 flex items-center justify-center shrink-0">
               <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 2a10 10 0 100 20A10 10 0 0012 2zm0 6v4l3 3" />
               </svg>
             </div>
             <div className="flex-1">
-              <h2 className="text-xl font-bold text-indigo-900 dark:text-indigo-100">Welcome to PocketPlan</h2>
-              <p className="text-sm text-indigo-700 dark:text-indigo-300 mt-1 max-w-lg">
-                Explore a simulated personal finance dashboard with budgets, transactions, connected accounts, and investments. No real data required.
+              <h2 className="text-xl font-bold text-white">Welcome to PocketPlan</h2>
+              <p className="text-sm text-indigo-200 mt-1 max-w-lg">
+                Explore a premium personal finance dashboard with budgets, transactions, accounts, and investments. No real data required.
               </p>
               <div className="flex flex-wrap gap-3 mt-4">
-                <Button onClick={handleLoadDemo}>Load demo experience</Button>
-                <Button variant="secondary" onClick={handleDismissOnboarding}>Start empty</Button>
+                <button
+                  onClick={handleLoadDemo}
+                  className="px-4 py-2 rounded-xl text-sm font-semibold bg-white text-indigo-700 hover:bg-indigo-50 active:scale-[0.97] transition-all duration-150 shadow-lg shadow-indigo-900/30"
+                >
+                  Load demo experience
+                </button>
+                <button
+                  onClick={handleDismissOnboarding}
+                  className="px-4 py-2 rounded-xl text-sm font-medium text-indigo-200 hover:text-white hover:bg-white/10 active:scale-[0.97] transition-all duration-150 border border-white/20"
+                >
+                  Start empty
+                </button>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Load demo prompt (minimal, after dismissal) */}
+      {/* Load demo prompt (minimal) */}
       {!hasData && onboardingDismissed && (
-        <div className="flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-5 py-4">
+        <div className="flex items-center justify-between bg-white/80 dark:bg-white/4 backdrop-blur-sm border border-slate-200/60 dark:border-white/8 rounded-2xl px-5 py-4">
           <p className="text-sm text-slate-600 dark:text-slate-300">No data yet. Want to explore with sample data?</p>
           <Button variant="secondary" size="sm" onClick={loadDemoData}>Load demo data</Button>
         </div>
       )}
 
-      {/* Net worth banner */}
+      {/* ── Hero section ─────────────────────────────────────────────────── */}
+      {hasData && (
+        <div className="relative overflow-hidden rounded-3xl animate-scale-in"
+          style={{ background: 'linear-gradient(135deg, #312e81 0%, #4338ca 35%, #6d28d9 65%, #7e22ce 100%)' }}>
+          {/* Background glow */}
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute top-0 right-0 w-64 h-64 rounded-full opacity-20"
+              style={{ background: 'radial-gradient(circle, #a78bfa 0%, transparent 70%)', transform: 'translate(30%, -30%)' }} />
+            <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full opacity-15"
+              style={{ background: 'radial-gradient(circle, #60a5fa 0%, transparent 70%)', transform: 'translate(-20%, 30%)' }} />
+          </div>
+
+          <div className="relative px-6 sm:px-8 pt-7 pb-6">
+            {/* Header row */}
+            <div className="flex items-start justify-between mb-6">
+              <div>
+                <p className="text-indigo-300 text-xs font-semibold uppercase tracking-widest mb-1">
+                  {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                  {lastSynced && (
+                    <span className="hidden sm:inline text-indigo-400">
+                      {' '}· Synced {new Date(lastSynced).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                    </span>
+                  )}
+                </p>
+                <h1 className="text-3xl sm:text-4xl font-bold text-white number-display">
+                  {formatCurrency(totalNetWorth)}
+                </h1>
+                <p className="text-indigo-300 text-sm mt-1">Net worth</p>
+              </div>
+              {hasData && (
+                <button
+                  onClick={() => setConfirmResetOpen(true)}
+                  className="text-xs text-indigo-400 hover:text-indigo-200 transition-colors underline underline-offset-2 mt-1 shrink-0"
+                >
+                  Reset
+                </button>
+              )}
+            </div>
+
+            {/* Metric pills */}
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              {[
+                { label: 'Income', value: income, color: 'text-emerald-300', bg: 'bg-white/8 border-white/12' },
+                { label: 'Expenses', value: expenses, color: 'text-red-300', bg: 'bg-white/8 border-white/12' },
+                { label: 'Balance', value: balance, color: 'text-white', bg: 'bg-white/15 border-white/20' },
+              ].map(({ label, value, color, bg }) => (
+                <div key={label} className={`rounded-2xl border px-3 py-3 sm:px-4 sm:py-4 ${bg}`}>
+                  <p className="text-[10px] sm:text-xs text-indigo-300 font-semibold uppercase tracking-wider mb-1.5">{label}</p>
+                  <p className={`text-base sm:text-xl font-bold number-display truncate ${color}`}>
+                    {value < 0 ? `-${formatCurrency(Math.abs(value))}` : formatCurrency(value)}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            {/* Forecast strip */}
+            {forecast.remainingDays > 0 && (
+              <div className="mt-4 flex flex-col sm:flex-row gap-2 sm:gap-4 pt-4 border-t border-white/10">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-indigo-400">Projected month-end:</span>
+                  <span className={`text-sm font-bold number-display ${forecastColor}`}>
+                    {formatCurrency(forecast.projectedBalance)}
+                  </span>
+                </div>
+                <div className="hidden sm:block w-px bg-white/15" />
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-indigo-400">Safe to spend:</span>
+                  <span className="text-sm font-bold text-white number-display">
+                    {formatCurrency(forecast.safeToSpendDaily)}<span className="text-xs font-normal text-indigo-300">/day</span>
+                  </span>
+                </div>
+                <div className="hidden sm:block w-px bg-white/15" />
+                <span className="text-xs text-indigo-400 self-center">{forecast.remainingDays} days left · {forecast.confidence} confidence</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Fallback page title when no hero */}
+      {!hasData && (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Dashboard</h1>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+              {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* ── Net worth breakdown ──────────────────────────────────────────── */}
       {accounts.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {NET_WORTH_CARDS.map(({ label, key, color, iconColor, icon }) => (
-            <div key={label} className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm px-4 py-3 hover:shadow-md transition-all duration-200">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 animate-slide-up">
+          {[
+            { label: 'Cash',        value: netWorth.cash,                                        color: 'text-slate-800 dark:text-slate-100', accent: '#6366f1', iconD: 'M3 9a2 2 0 012-2h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9zm0 0V7a2 2 0 012-2h2M16 5H8a2 2 0 00-2 2' },
+            { label: 'Investments', value: portfolioValue || netWorth.investments,                color: 'text-indigo-700 dark:text-indigo-300', accent: '#6366f1', iconD: 'M3 17l4-8 4 4 4-6 4 3' },
+            { label: 'Credit Debt', value: netWorth.creditCardDebt,                              color: 'text-red-600 dark:text-red-400',       accent: '#ef4444', iconD: 'M1 6h22v13a2 2 0 01-2 2H3a2 2 0 01-2-2V6zm0 5h22' },
+            { label: 'Net Worth',   value: netWorth.cash + (portfolioValue || netWorth.investments) - netWorth.creditCardDebt, color: 'text-emerald-700 dark:text-emerald-300', accent: '#10b981', iconD: 'M12 20V10M18 20V4M6 20v-4' },
+          ].map(({ label, value, color, accent, iconD }) => (
+            <div key={label} className="bg-white/80 dark:bg-slate-900/70 backdrop-blur-sm rounded-2xl border border-slate-200/70 dark:border-white/6 shadow-card px-4 py-3.5 hover:shadow-panel hover:-translate-y-0.5 transition-all duration-200">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs text-slate-500 dark:text-slate-400">{label}</p>
-                <div className={`w-6 h-6 rounded-md flex items-center justify-center ${iconColor}`}>{icon}</div>
+                <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${accent}18` }}>
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+                    <path d={iconD} />
+                  </svg>
+                </div>
               </div>
-              <p className={`text-lg font-bold ${color}`}>{formatCurrency(netWorthValues[key])}</p>
+              <p className={`text-base font-bold number-display ${color}`}>{formatCurrency(value)}</p>
             </div>
           ))}
         </div>
       )}
 
-      {/* Monthly summary cards */}
-      <div className="grid grid-cols-3 gap-3 sm:gap-4">
-        <SummaryCard label="Income" amount={income} variant="income" />
-        <SummaryCard label="Expenses" amount={expenses} variant="expense" />
-        <SummaryCard label="Balance" amount={balance} variant="balance" />
-      </div>
-
-      {/* Forecast + Safe-to-Spend — only show when there's data */}
-      {hasData && forecast.remainingDays > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {/* Cash flow forecast */}
-          <div className={`rounded-xl border px-5 py-4 ${forecastBg}`}>
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">
-              Projected Month-End
-            </p>
-            <p className={`text-2xl font-bold ${forecastColor}`}>
-              {formatCurrency(forecast.projectedBalance)}
-            </p>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              {forecast.remainingDays} days remaining · {forecast.confidence} confidence
-            </p>
-          </div>
-
-          {/* Safe to spend */}
-          <div className="rounded-xl border border-indigo-100 dark:border-indigo-900/50 bg-indigo-50 dark:bg-indigo-950/40 px-5 py-4">
-            <p className="text-xs font-medium text-indigo-600 dark:text-indigo-400 uppercase tracking-wide mb-1">
-              Safe to Spend
-            </p>
-            <p className="text-2xl font-bold text-indigo-700 dark:text-indigo-300">
-              {formatCurrency(forecast.safeToSpendDaily)}<span className="text-sm font-normal text-indigo-500 dark:text-indigo-400">/day</span>
-            </p>
-            <p className="text-xs text-indigo-500 dark:text-indigo-400 mt-1">
-              After committed expenses for the rest of the month
-            </p>
-          </div>
+      {/* ── Monthly summary cards (when no hero) ────────────────────────── */}
+      {!hasData && (
+        <div className="grid grid-cols-3 gap-3 sm:gap-4">
+          <SummaryCard label="Income" amount={income} variant="income" />
+          <SummaryCard label="Expenses" amount={expenses} variant="expense" />
+          <SummaryCard label="Balance" amount={balance} variant="balance" />
         </div>
       )}
 
-      {/* Month-over-month spending changes */}
+      {/* ── Month-over-month spending changes ────────────────────────────── */}
       {comparisons.length > 0 && (
-        <section>
+        <section className="animate-slide-up stagger-1">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Spending Changes vs Last Month</h2>
+            <h2 className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Spending vs Last Month</h2>
             <button onClick={() => onNavigate('analytics')} className="text-xs text-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
               View analytics →
             </button>
@@ -244,9 +281,9 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
               const up = c.delta > 0
               const neutral = Math.abs(c.delta) < 1
               return (
-                <div key={c.category} className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 px-4 py-3">
-                  <p className="text-xs text-slate-500 dark:text-slate-400">{c.category}</p>
-                  <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-0.5">{formatCurrency(c.thisMonth)}</p>
+                <div key={c.category} className="bg-white/80 dark:bg-slate-900/70 backdrop-blur-sm rounded-2xl border border-slate-200/70 dark:border-white/6 px-4 py-3.5 shadow-card">
+                  <p className="text-xs text-slate-400 dark:text-slate-500">{c.category}</p>
+                  <p className="text-sm font-semibold number-display text-slate-800 dark:text-slate-200 mt-0.5">{formatCurrency(c.thisMonth)}</p>
                   <span className={`text-xs font-medium ${
                     neutral ? 'text-slate-400' :
                     up ? 'text-red-500 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'
@@ -260,16 +297,16 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
         </section>
       )}
 
-      {/* Monthly insights */}
+      {/* ── Insights ─────────────────────────────────────────────────────── */}
       {insights.length > 0 && (
-        <section>
+        <section className="animate-slide-up stagger-2">
           <h2 className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-3">Monthly Insights</h2>
           <div className="flex flex-col gap-2">
             {insights.map((insight) => {
               const c = INSIGHT_COLORS[insight.type]
               return (
-                <div key={insight.id} className={`flex items-start gap-3 rounded-lg px-4 py-3 ${c.bg}`}>
-                  <span className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${c.dot}`} />
+                <div key={insight.id} className={`flex items-start gap-3 rounded-xl px-4 py-3 ${c.bg}`}>
+                  <span className={`mt-1.5 w-1.5 h-1.5 rounded-full shrink-0 ${c.dot}`} />
                   <p className={`text-sm ${c.text}`}>{insight.text}</p>
                 </div>
               )
@@ -278,19 +315,19 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
         </section>
       )}
 
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      {/* ── Charts ───────────────────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-slide-up stagger-3">
         <CategoryChart data={categoryData} />
         <MonthlyChart data={monthlyChartData} />
       </div>
 
-      {/* Recent activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      {/* ── Recent activity ──────────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-slide-up stagger-4">
         <RecentTransactions transactions={recentTransactions} onViewAll={() => onNavigate('transactions')} />
         <BudgetProgressList items={budgetProgress} onViewAll={() => onNavigate('budgets')} />
       </div>
 
-      {/* Reset confirmation modal */}
+      {/* ── Reset confirmation modal ─────────────────────────────────────── */}
       <Modal isOpen={confirmResetOpen} onClose={() => setConfirmResetOpen(false)} title="Reset demo data?">
         <div className="flex flex-col gap-5">
           <p className="text-sm text-slate-600 dark:text-slate-300">

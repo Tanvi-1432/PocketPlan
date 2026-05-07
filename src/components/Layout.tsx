@@ -21,9 +21,13 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'settings',    label: 'Settings',     d: 'M12 15a3 3 0 100-6 3 3 0 000 6zm8.9-3a8.9 8.9 0 01-.1 1.4l2 1.6-2 3.5-2.4-.9a7 7 0 01-2.4 1.4L15.5 21h-4l-.5-2.1A7 7 0 018.6 17.5l-2.4.9-2-3.5 2-1.6A9 9 0 016.1 12a9 9 0 01.1-1.4l-2-1.6 2-3.5 2.4.9A7 7 0 0111 4.9L11.5 3h4l.5 2.1a7 7 0 012.4 1.4l2.4-.9 2 3.5-2 1.6c.1.5.1.9.1 1.3z' },
 ]
 
-function NavIcon({ d }: { d: string }) {
+// Bottom mobile nav shows only the 5 most important pages
+const MOBILE_NAV_ITEMS = NAV_ITEMS.slice(0, 5)
+
+function NavIcon({ d, size = 'md' }: { d: string; size?: 'sm' | 'md' }) {
+  const sz = size === 'sm' ? 'w-4 h-4' : 'w-[18px] h-[18px]'
   return (
-    <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+    <svg className={`${sz} shrink-0`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
       <path d={d} />
     </svg>
   )
@@ -39,10 +43,10 @@ function ThemeToggle({ compact = false }: { compact?: boolean }) {
     <button
       onClick={toggleTheme}
       aria-label="Toggle dark mode"
-      className={`flex items-center gap-2 rounded-lg transition-all duration-150 active:scale-95
-        text-slate-500 hover:text-slate-700 hover:bg-slate-100
-        dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800
-        ${compact ? 'p-2' : 'px-3 py-2 text-xs font-medium w-full'}`}
+      className={`flex items-center gap-2 rounded-xl transition-all duration-200 active:scale-95
+        text-slate-400 hover:text-slate-600 hover:bg-slate-100/80
+        dark:text-slate-500 dark:hover:text-slate-300 dark:hover:bg-white/5
+        ${compact ? 'p-2' : 'px-3 py-2.5 text-xs font-medium w-full'}`}
     >
       {isDark ? (
         <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
@@ -74,36 +78,54 @@ export default function Layout({ currentPage, onNavigate, children }: LayoutProp
 
   const navButtonClass = (id: Page) => {
     const active = currentPage === id
-    return `w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
+    return `w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
       active
-        ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300'
-        : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100 active:scale-95'
+        ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300 nav-active-glow'
+        : 'text-slate-500 hover:bg-slate-100/80 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200 active:scale-[0.98]'
+    }`
+  }
+
+  const mobileNavClass = (id: Page) => {
+    const active = currentPage === id
+    return `flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all duration-200 active:scale-95 ${
+      active
+        ? 'text-indigo-600 dark:text-indigo-400'
+        : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
     }`
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex transition-colors duration-200">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#080d1a] flex transition-colors duration-300 relative">
+
+      {/* ── Ambient background ───────────────────────────────────────────── */}
+      <div className="ambient-bg">
+        <div className="ambient-mid" />
+      </div>
 
       {/* ── Sidebar desktop ─────────────────────────────────────────────── */}
-      <aside className="hidden md:flex flex-col w-60 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 fixed inset-y-0 z-10 transition-colors duration-200">
+      <aside className="hidden md:flex flex-col w-[220px] glass-sidebar fixed inset-y-0 z-20 transition-all duration-300">
 
         {/* Logo */}
-        <div className="px-5 py-5 border-b border-slate-100 dark:border-slate-800">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center shrink-0">
-              <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+        <div className="px-5 pt-6 pb-5">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+              style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)' }}>
+              <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 2a10 10 0 100 20A10 10 0 0012 2zm0 6v4l3 3" />
               </svg>
             </div>
             <div>
-              <span className="text-base font-bold text-indigo-600 tracking-tight leading-none">PocketPlan</span>
-              <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Personal Finance</p>
+              <span className="text-[15px] font-bold tracking-tight leading-none"
+                style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                PocketPlan
+              </span>
+              <p className="text-[10px] text-slate-400 dark:text-slate-600 mt-0.5">Personal Finance</p>
             </div>
           </div>
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+        <nav className="flex-1 px-3 py-1 space-y-0.5 overflow-y-auto">
           {NAV_ITEMS.map((item) => (
             <button key={item.id} onClick={() => navigate(item.id)} className={navButtonClass(item.id)}>
               <NavIcon d={item.d} />
@@ -113,30 +135,36 @@ export default function Layout({ currentPage, onNavigate, children }: LayoutProp
         </nav>
 
         {/* Footer */}
-        <div className="px-3 py-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
+        <div className="px-3 pb-5 pt-3 space-y-1 border-t border-slate-200/60 dark:border-white/5">
           <ThemeToggle />
-          <div className="flex items-center gap-2 bg-amber-50 dark:bg-amber-950/50 rounded-lg px-3 py-2">
-            <span className="text-amber-500 text-xs">●</span>
+          <div className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 bg-amber-50/80 dark:bg-amber-500/8 border border-amber-100 dark:border-amber-500/15">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
             <p className="text-xs text-amber-700 dark:text-amber-400 font-medium">Demo Mode</p>
           </div>
         </div>
       </aside>
 
-      {/* ── Mobile header ────────────────────────────────────────────────── */}
-      <div className="md:hidden fixed top-0 inset-x-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 h-14 transition-colors duration-200">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-indigo-600 flex items-center justify-center">
-            <svg className="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+      {/* ── Mobile top bar ───────────────────────────────────────────────── */}
+      <div className="md:hidden fixed top-0 inset-x-0 z-30 flex items-center justify-between px-4 h-14"
+        style={{ backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', background: 'rgba(248,250,252,0.85)', borderBottom: '1px solid rgba(226,232,240,0.6)' }}>
+        <div className="dark:[background:rgba(8,13,26,0.88)] dark:[border-bottom-color:rgba(255,255,255,0.05)] absolute inset-0 -z-10" />
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-xl flex items-center justify-center"
+            style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)' }}>
+            <svg className="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 2a10 10 0 100 20A10 10 0 0012 2zm0 6v4l3 3" />
             </svg>
           </div>
-          <span className="text-base font-bold text-indigo-600">PocketPlan</span>
+          <span className="text-[15px] font-bold tracking-tight"
+            style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            PocketPlan
+          </span>
         </div>
         <div className="flex items-center gap-1">
           <ThemeToggle compact />
           <button
             onClick={() => setMobileMenuOpen((o) => !o)}
-            className="p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-95 transition-all duration-150"
+            className="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/8 active:scale-95 transition-all duration-150"
             aria-label="Toggle menu"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -151,16 +179,18 @@ export default function Layout({ currentPage, onNavigate, children }: LayoutProp
       {/* Mobile overlay */}
       {mobileMenuOpen && (
         <div
-          className="md:hidden fixed inset-0 z-10 bg-black/20 backdrop-blur-[1px]"
+          className="md:hidden fixed inset-0 z-20 bg-black/20 dark:bg-black/40"
+          style={{ backdropFilter: 'blur(2px)' }}
           onClick={() => setMobileMenuOpen(false)}
         />
       )}
 
-      {/* Mobile dropdown */}
+      {/* Mobile fullscreen menu */}
       <div
-        className={`md:hidden fixed top-14 inset-x-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-3 py-2 space-y-0.5 shadow-lg transition-all duration-200 ease-out ${
-          mobileMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'
+        className={`md:hidden fixed top-14 inset-x-0 z-30 px-3 py-2 space-y-0.5 shadow-xl transition-all duration-250 ease-out ${
+          mobileMenuOpen ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 -translate-y-3 pointer-events-none'
         }`}
+        style={{ backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', background: 'rgba(248,250,252,0.95)', borderBottom: '1px solid rgba(226,232,240,0.6)' }}
       >
         {NAV_ITEMS.map((item) => (
           <button key={item.id} onClick={() => navigate(item.id)} className={navButtonClass(item.id)}>
@@ -168,24 +198,59 @@ export default function Layout({ currentPage, onNavigate, children }: LayoutProp
             {item.label}
           </button>
         ))}
-        <div className="pt-1 pb-1 space-y-1">
+        <div className="pt-2 pb-1 space-y-1 border-t border-slate-200/60 dark:border-white/5 mt-1">
           <ThemeToggle />
-          <div className="flex items-center gap-2 bg-amber-50 dark:bg-amber-950/50 rounded-lg px-3 py-2">
-            <span className="text-amber-500 text-xs">●</span>
+          <div className="flex items-center gap-2 rounded-xl px-3 py-2 bg-amber-50/80 dark:bg-amber-500/8">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
             <p className="text-xs text-amber-700 dark:text-amber-400 font-medium">Demo Mode — all data is simulated</p>
           </div>
         </div>
       </div>
 
       {/* ── Main content ─────────────────────────────────────────────────── */}
-      <main className="flex-1 md:ml-60 pt-14 md:pt-0 min-h-screen">
+      <main className="flex-1 md:ml-[220px] pt-14 md:pt-0 min-h-screen relative z-10">
         <div
           className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8"
-          style={{ paddingBottom: 'calc(3rem + env(safe-area-inset-bottom))' }}
+          style={{ paddingBottom: 'calc(5rem + env(safe-area-inset-bottom))' }}
         >
           {children}
         </div>
       </main>
+
+      {/* ── Mobile bottom navigation ─────────────────────────────────────── */}
+      <nav className="md:hidden fixed bottom-0 inset-x-0 z-30 mobile-nav-blur"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+        <div className="flex items-center justify-around px-2 py-1">
+          {MOBILE_NAV_ITEMS.map((item) => {
+            const active = currentPage === item.id
+            return (
+              <button key={item.id} onClick={() => navigate(item.id)} className={mobileNavClass(item.id)}>
+                {active ? (
+                  <div className="relative">
+                    <div className="absolute inset-0 -m-1 rounded-full bg-indigo-100 dark:bg-indigo-500/15 blur-sm" />
+                    <NavIcon d={item.d} size="sm" />
+                  </div>
+                ) : (
+                  <NavIcon d={item.d} size="sm" />
+                )}
+                <span className="text-[10px] font-medium">{item.label}</span>
+              </button>
+            )
+          })}
+          {/* More button for hidden pages */}
+          <button
+            onClick={() => setMobileMenuOpen((o) => !o)}
+            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all duration-200 active:scale-95 ${
+              mobileMenuOpen ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'
+            }`}
+          >
+            <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>
+            </svg>
+            <span className="text-[10px] font-medium">More</span>
+          </button>
+        </div>
+      </nav>
     </div>
   )
 }

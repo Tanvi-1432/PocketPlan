@@ -1,12 +1,227 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 @variant dark (&:where(.dark, .dark *));
 
+/* ── Design tokens ──────────────────────────────────────── */
+:root {
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Ambient glow colors */
+  --glow-indigo: rgba(99, 102, 241, 0.15);
+  --glow-purple: rgba(139, 92, 246, 0.12);
+  --glow-cyan:   rgba(6, 182, 212, 0.08);
+  --glow-rose:   rgba(244, 63, 94, 0.08);
+
+  /* Glass surface */
+  --glass-bg:     rgba(255, 255, 255, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.6);
+  --glass-blur:   20px;
+
+  /* Elevation shadows */
+  --shadow-xs:  0 1px 2px 0 rgba(15, 23, 42, 0.04);
+  --shadow-sm:  0 1px 3px 0 rgba(15, 23, 42, 0.06), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
+  --shadow-md:  0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
+  --shadow-lg:  0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.05);
+  --shadow-xl:  0 20px 25px -5px rgba(15, 23, 42, 0.10), 0 8px 10px -6px rgba(15, 23, 42, 0.06);
+  --shadow-glow-indigo: 0 0 0 1px rgba(99,102,241,0.15), 0 4px 16px rgba(99,102,241,0.12);
+  --shadow-glow-emerald: 0 0 0 1px rgba(16,185,129,0.15), 0 4px 16px rgba(16,185,129,0.10);
+  --shadow-glow-red: 0 0 0 1px rgba(239,68,68,0.15), 0 4px 16px rgba(239,68,68,0.10);
+}
+
+.dark {
+  --glass-bg:     rgba(15, 23, 42, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.07);
+  --glow-indigo:  rgba(99, 102, 241, 0.20);
+  --glow-purple:  rgba(139, 92, 246, 0.16);
+  --glow-cyan:    rgba(6, 182, 212, 0.10);
+  --glow-rose:    rgba(244, 63, 94, 0.10);
+}
+
+/* ── Base ───────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+}
+
+/* ── Tabular nums for financial data ────────────────────── */
+.tabular { font-variant-numeric: tabular-nums; }
+
+/* ── Ambient background ─────────────────────────────────── */
+.ambient-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.ambient-bg::before {
+  content: '';
+  position: absolute;
+  top: -20%;
+  left: -10%;
+  width: 60%;
+  height: 60%;
+  background: radial-gradient(ellipse at center, var(--glow-indigo) 0%, transparent 70%);
+  filter: blur(60px);
+}
+
+.ambient-bg::after {
+  content: '';
+  position: absolute;
+  bottom: -10%;
+  right: -10%;
+  width: 55%;
+  height: 55%;
+  background: radial-gradient(ellipse at center, var(--glow-purple) 0%, transparent 70%);
+  filter: blur(70px);
+}
+
+.ambient-mid {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50%;
+  height: 40%;
+  background: radial-gradient(ellipse at center, var(--glow-cyan) 0%, transparent 70%);
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+/* ── Glass utilities ────────────────────────────────────── */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+}
+
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: 1rem;
+  box-shadow: var(--shadow-md);
+}
+
+.glass-sidebar {
+  background: rgba(255,255,255,0.82);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-right: 1px solid rgba(226,232,240,0.8);
+}
+
+.dark .glass-sidebar {
+  background: rgba(11, 17, 32, 0.88);
+  border-right: 1px solid rgba(255,255,255,0.06);
+}
+
+/* ── Elevation shadows ──────────────────────────────────── */
+.shadow-xs   { box-shadow: var(--shadow-xs); }
+.shadow-sm   { box-shadow: var(--shadow-sm); }
+.shadow-card { box-shadow: var(--shadow-md); }
+.shadow-panel { box-shadow: var(--shadow-lg); }
+.shadow-modal { box-shadow: var(--shadow-xl); }
+.shadow-glow-indigo  { box-shadow: var(--shadow-glow-indigo); }
+.shadow-glow-emerald { box-shadow: var(--shadow-glow-emerald); }
+.shadow-glow-red     { box-shadow: var(--shadow-glow-red); }
+
+/* ── Hero card gradient ─────────────────────────────────── */
+.hero-gradient {
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 40%, #7c3aed 70%, #8b5cf6 100%);
+}
+
+.hero-gradient-emerald {
+  background: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%);
+}
+
+.hero-gradient-rose {
+  background: linear-gradient(135deg, #e11d48 0%, #f43f5e 50%, #fb7185 100%);
+}
+
+/* ── Premium number display ─────────────────────────────── */
+.number-display {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  font-feature-settings: 'tnum';
+}
+
+/* ── Glow pulse animation ───────────────────────────────── */
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.6; }
+  50%       { opacity: 1;   }
+}
+
+.glow-pulse {
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+/* ── Slide animations ───────────────────────────────────── */
 @keyframes slide-up {
   from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-.animate-slide-up {
-  animation: slide-up 0.2s ease-out;
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.animate-slide-up       { animation: slide-up 0.25s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-slide-in-right { animation: slide-in-right 0.25s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-fade-in        { animation: fade-in 0.2s ease-out both; }
+.animate-scale-in       { animation: scale-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+/* ── Stagger utilities ──────────────────────────────────── */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.10s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.20s; }
+
+/* ── Nav active glow ────────────────────────────────────── */
+.nav-active-glow {
+  box-shadow: inset 0 0 0 1px rgba(99,102,241,0.2), 0 1px 6px rgba(99,102,241,0.15);
+}
+
+/* ── Scrollbar styling ──────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.3); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(148,163,184,0.5); }
+
+/* ── Recharts overrides ─────────────────────────────────── */
+.recharts-tooltip-wrapper .recharts-default-tooltip {
+  border-radius: 0.75rem !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+}
+
+/* ── Bottom mobile nav ──────────────────────────────────── */
+.mobile-nav-blur {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(255,255,255,0.88);
+  border-top: 1px solid rgba(226,232,240,0.7);
+}
+
+.dark .mobile-nav-blur {
+  background: rgba(11, 17, 32, 0.92);
+  border-top: 1px solid rgba(255,255,255,0.06);
 }
