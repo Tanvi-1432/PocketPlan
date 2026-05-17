@@ -16,15 +16,13 @@ The UI is built around a glassmorphism design language with a pastel ambient pal
 
 ## Screenshots
 
-> Add screenshots to `screenshots/` and update these paths.
-
 | Dashboard | Analytics | Transactions |
 |---|---|---|
-| `screenshots/dashboard-light.png` | `screenshots/analytics.png` | `screenshots/transactions.png` |
+| ![Dashboard](screenshots/dashboard-light.png) | ![Analytics](screenshots/analytics.png) | ![Transactions](screenshots/transactions.png) |
 
 | Mobile | Dark Mode | Settings |
 |---|---|---|
-| `screenshots/mobile.png` | `screenshots/dashboard-dark.png` | `screenshots/settings.png` |
+| ![Mobile](screenshots/mobile.png) | ![Dark Mode](screenshots/dashboard-dark.png) | ![Settings](screenshots/settings.png) |
 
 ---
 
