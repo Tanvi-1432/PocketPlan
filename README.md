@@ -210,9 +210,7 @@ PocketPlan is a static SPA deployed on Vercel. `vercel.json` redirects all route
 
 ## Development Approach
 
-This project was built with **Claude Code** as an AI development assistant. Product direction, feature scoping, UI design decisions, architecture choices, debugging, and iteration were driven manually throughout. Claude Code was used to accelerate implementation — writing and refactoring code, catching type errors, and helping work through edge cases in the financial logic — while the overall product vision and engineering decisions remained human-directed.
-
-This reflects how modern developers actually work: AI as a capable collaborator, not a replacement for product thinking.
+PocketPlan was built using a modern AI-assisted development workflow alongside manual product planning, architecture design, debugging, testing, and iterative feature development. AI tools were used to accelerate implementation and refactoring, while application structure, feature direction, financial systems logic, and UI/UX decisions were actively designed and refined throughout the project lifecycle.
 
 ---
 
