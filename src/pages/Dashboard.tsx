@@ -32,6 +32,16 @@ interface DashboardProps {
   onNavigate: (page: Page) => void
 }
 
+/**
+ * Dashboard page for PocketPlan.
+ *
+ * Responsibilities:
+ * - Show the current month financial snapshot.
+ * - Compose transactions, budgets, accounts, and holdings into net worth.
+ * - Render chart-ready derived data and short insights.
+ * - Own the first-run/demo-data onboarding prompt.
+ */
+
 const INSIGHT_COLORS = {
   positive: {
     bg: 'rgba(52,211,153,0.10)',
@@ -62,6 +72,8 @@ const INSIGHT_COLORS = {
 const DISMISSED_KEY = 'pocketplan-onboarding-dismissed'
 
 export default function Dashboard({ onNavigate }: DashboardProps) {
+  // The dashboard is a read-heavy composition layer. Stores provide persisted
+  // raw data; utilities below turn that data into UI-ready summaries.
   const { transactions } = useTransactionsStore()
   const { budgets } = useBudgetsStore()
   const { accounts } = useAccountsStore()
@@ -75,6 +87,11 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
 
   const monthKey = currentMonthKey()
 
+  // ====================
+  // Derived Financial Data
+  // ====================
+  // Memoization keeps chart arrays and summary calculations stable between
+  // renders unless their source store data changes.
   const monthlyTransactions = useMemo(() => filterByMonth(transactions, monthKey), [transactions, monthKey])
   const income    = useMemo(() => getTotalIncome(monthlyTransactions),   [monthlyTransactions])
   const expenses  = useMemo(() => getTotalExpenses(monthlyTransactions), [monthlyTransactions])
@@ -89,6 +106,8 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
   const forecast           = useMemo(() => computeCashFlowForecast(transactions, budgets, netWorth.cash), [transactions, budgets, netWorth.cash])
   const comparisons        = useMemo(() => getSpendingComparisons(transactions, monthKey).slice(0, 3), [transactions, monthKey])
 
+  // Find the latest sync timestamp across all connected demo accounts so the
+  // hero can show one concise "last synced" label.
   const lastSynced = accounts.length > 0
     ? accounts.reduce<string | null>((latest, a) => {
         if (!a.lastSynced) return latest
@@ -97,9 +116,13 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
       }, null)
     : null
 
+  // Prefer holding-level portfolio value when holdings are loaded; fall back to
+  // brokerage account balances if only account data exists.
   const totalNetWorth = netWorth.cash + (portfolioValue || netWorth.investments) - netWorth.creditCardDebt
 
   function handleDismissOnboarding() {
+    // Persist dismissal outside Zustand because onboarding is local UI state,
+    // not financial data.
     localStorage.setItem(DISMISSED_KEY, 'true')
     setOnboardingDismissed(true)
   }
@@ -111,6 +134,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
 
   const showOnboarding = !hasData && !onboardingDismissed
 
+  // Forecast status controls the color treatment of month-end projection.
   const forecastIsPositive = forecast.projectedBalance >= 1000
   const forecastIsWarn     = forecast.projectedBalance >= 0 && forecast.projectedBalance < 1000
 

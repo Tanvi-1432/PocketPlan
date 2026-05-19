@@ -6,6 +6,15 @@ import { autoDetectCategory } from '../../utils/categorization'
 import { Button, Input, Select } from '../ui'
 import type { SelectOption } from '../ui'
 
+/**
+ * Transaction create/edit form.
+ *
+ * Responsibilities:
+ * - Normalize text/amount/date inputs into the Transaction shape.
+ * - Auto-detect categories from merchant names unless the user overrides them.
+ * - Capture recurring metadata used by forecast/recurring helpers.
+ */
+
 interface TransactionFormProps {
   initial?: Transaction
   onSubmit: (data: Omit<Transaction, 'id'>) => void
@@ -26,6 +35,8 @@ const FREQUENCY_OPTIONS: SelectOption[] = [
 ]
 
 function categoryOptions(type: TransactionType): SelectOption[] {
+  // Income and expense categories are separated so the form cannot create an
+  // expense categorized as Salary unless the data model changes intentionally.
   const cats = type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES
   return cats.map((c) => ({ value: c, label: c }))
 }
@@ -43,6 +54,8 @@ interface FormState {
 }
 
 function initialState(t?: Transaction): FormState {
+  // Keep form values as strings where inputs need string control, then convert
+  // to typed values only on submit.
   return {
     title: t?.title ?? '',
     amount: t?.amount.toString() ?? '',
@@ -65,6 +78,8 @@ export default function TransactionForm({ initial, onSubmit, onCancel }: Transac
     setForm((prev) => {
       const next = { ...prev, [key]: value }
       if (key === 'type') {
+        // Changing type can invalidate the selected category, so reset to the
+        // first valid category and allow auto-detection to run again.
         const cats = value === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES
         if (!cats.includes(next.category)) {
           next.category = cats[0]
@@ -77,6 +92,8 @@ export default function TransactionForm({ initial, onSubmit, onCancel }: Transac
   }
 
   function handleTitleBlur() {
+    // Merchant/category detection runs on blur instead of every keystroke so it
+    // feels helpful without fighting the user's typing.
     if (form.categoryOverridden || !form.title.trim()) return
     const { category, confident } = autoDetectCategory(form.title.trim(), form.type)
     const cats = form.type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES
@@ -87,6 +104,7 @@ export default function TransactionForm({ initial, onSubmit, onCancel }: Transac
   }
 
   function handleCategoryChange(cat: Category) {
+    // Once the user manually chooses a category, stop auto-changing it.
     setAutoCatSuggestion(null)
     setField('category', cat)
     setField('categoryOverridden', true)
@@ -106,6 +124,8 @@ export default function TransactionForm({ initial, onSubmit, onCancel }: Transac
     e.preventDefault()
     if (!validate()) return
     const wasAutoCat = autoCatSuggestion !== null && !form.categoryOverridden
+    // Optional fields become `undefined` so persisted transactions stay compact
+    // and badges only render when the metadata actually exists.
     onSubmit({
       title: form.title.trim(),
       amount: parseFloat(form.amount),

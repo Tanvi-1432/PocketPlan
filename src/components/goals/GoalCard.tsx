@@ -2,6 +2,12 @@ import type { SavingsGoal } from '../../types'
 import { formatCurrency, formatDate } from '../../utils'
 import { ProgressBar, Button } from '../ui'
 
+/**
+ * Goal progress card.
+ *
+ * Converts a SavingsGoal into progress, deadline status, and contribution UI.
+ */
+
 interface GoalCardProps {
   goal: SavingsGoal
   onEdit: () => void
@@ -19,6 +25,8 @@ function daysRemaining(deadline: string): number {
 type GoalStatus = 'complete' | 'on-track' | 'needs-attention' | 'overdue'
 
 function getStatus(percent: number, days: number, isComplete: boolean): GoalStatus {
+  // This intentionally favors encouragement: high progress or a long runway is
+  // "on track"; otherwise the card asks for attention.
   if (isComplete) return 'complete'
   if (days < 0) return 'overdue'
   if (percent >= 70 || days > 60) return 'on-track'
@@ -34,6 +42,8 @@ const STATUS_STYLES: Record<GoalStatus, { label: string; className: string }> = 
 
 export default function GoalCard({ goal, onEdit, onDelete, onContribute }: GoalCardProps) {
   const { name, targetAmount, currentAmount, deadline } = goal
+  // Clamp visual progress at 100%; the store also clamps contributions, but the
+  // UI remains defensive for imported or edited data.
   const percent = targetAmount > 0 ? Math.min((currentAmount / targetAmount) * 100, 100) : 0
   const isComplete = currentAmount >= targetAmount
   const days = daysRemaining(deadline)

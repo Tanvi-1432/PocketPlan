@@ -11,6 +11,13 @@ import {
   buildDemoHoldings,
 } from '../constants/demoData'
 
+/**
+ * Coordinates demo data across all persisted stores.
+ *
+ * The builders live in `constants/demoData.ts`, while this hook owns when that
+ * generated data is written into Zustand. Keeping orchestration here lets pages
+ * load/reset the full experience with one call.
+ */
 export function useDemoData() {
   const { transactions, upsertTransaction } = useTransactionsStore()
   const { budgets, setBudget } = useBudgetsStore()
@@ -25,28 +32,33 @@ export function useDemoData() {
     accounts.length > 0 ||
     holdings.length > 0
 
-  // Fully idempotent — safe to call multiple times, in any order
+  // Fully idempotent: each domain uses stable IDs or upsert semantics, so this
+  // can be called from Dashboard and Settings without duplicating demo rows.
   function loadDemoData() {
     const now = new Date().toISOString()
 
-    // Synced transactions only — manual set overlaps in category/amount and looks like duplicates
+    // Transactions are marked as imported now so synced badges/timestamps feel
+    // fresh even though the generated month history is deterministic by ID.
     buildDemoTransactions().forEach((t) => upsertTransaction({ ...t, importedAt: now }))
 
-    // Budgets — setBudget is already an upsert by category+month
+    // Budgets upsert by category+month, which keeps one monthly limit per
+    // category even if the user clicks "Load demo" repeatedly.
     buildDemoBudgets().forEach((b) => setBudget(b))
 
-    // Goals — upsert by stable id
+    // Goals/holdings use stable IDs so the stores can replace existing demo
+    // entities instead of appending duplicates.
     buildDemoGoals().forEach((g) => upsertGoal(g))
 
-    // Accounts — set as a batch (replaces existing demo accounts)
+    // Accounts are replaced as a batch because the demo account set should stay
+    // internally consistent with transaction accountId foreign keys.
     const { setAccounts } = useAccountsStore.getState()
     setAccounts(buildDemoAccounts(now))
 
-    // Holdings — upsert by stable id
     buildDemoHoldings().forEach((h) => upsertHolding(h))
   }
 
-  // Clears all data and resets onboarding so the welcome card reappears
+  // Clears each persisted domain through its public delete API and resets
+  // onboarding so the welcome card can teach the first-run flow again.
   function clearDemoData() {
     useTransactionsStore.getState().transactions
       .forEach((t) => useTransactionsStore.getState().deleteTransaction(t.id))
@@ -62,7 +74,8 @@ export function useDemoData() {
     localStorage.removeItem('pocketplan-onboarding-dismissed')
   }
 
-  // Nuclear clear — removes everything including user-created data
+  // Nuclear clear for development/testing. This intentionally removes
+  // user-created local records as well as demo records.
   function clearAllData() {
     useTransactionsStore.getState().transactions
       .forEach((t) => useTransactionsStore.getState().deleteTransaction(t.id))

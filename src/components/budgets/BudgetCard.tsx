@@ -3,6 +3,13 @@ import { CATEGORY_COLORS } from '../../constants'
 import { formatCurrency } from '../../utils'
 import { ProgressBar, Button } from '../ui'
 
+/**
+ * Budget progress card.
+ *
+ * Receives precomputed BudgetProgress so this component only renders the state:
+ * percent used, remaining dollars, and over-budget messaging.
+ */
+
 interface BudgetCardProps {
   item: BudgetProgress
   onEdit: () => void

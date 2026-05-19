@@ -3,6 +3,12 @@ import { filterByMonth, groupByCategory, getTotalIncome, getTotalExpenses, getBa
 import { getBudgetProgress } from './budgets'
 import { formatCurrency } from './currency'
 
+/**
+ * Generates short, human-readable insights for the dashboard.
+ *
+ * The function intentionally limits output to the highest-signal messages so
+ * the dashboard feels helpful instead of noisy.
+ */
 export interface Insight {
   id: string
   text: string
@@ -24,7 +30,7 @@ export function generateInsights(
 
   if (monthly.length === 0) return insights
 
-  // Highest spending category
+  // Highest spending category: quick answer to "where did my money go?"
   const categoryTotals = groupByCategory(expenses)
   if (categoryTotals.length > 0) {
     const top = categoryTotals[0]
@@ -35,7 +41,7 @@ export function generateInsights(
     })
   }
 
-  // Savings / balance insight
+  // Savings / balance insight compares net cash flow against income.
   if (income > 0) {
     if (balance > 0) {
       const savingsRate = Math.round((balance / income) * 100)
@@ -53,7 +59,8 @@ export function generateInsights(
     }
   }
 
-  // Budget insights
+  // Budget insights reuse the same progress calculation as budget cards, so
+  // dashboard warnings stay consistent with the Budgets page.
   const progress: BudgetProgress[] = getBudgetProgress(budgets, transactions, monthKey)
 
   const overBudget = progress.filter((p) => p.isOverBudget)
@@ -76,7 +83,7 @@ export function generateInsights(
     })
   }
 
-  // Expense vs income ratio
+  // Expense vs income ratio rewards low spend months when income exists.
   if (income > 0 && totalExpenses > 0) {
     const ratio = Math.round((totalExpenses / income) * 100)
     if (ratio < 70) {

@@ -1,5 +1,14 @@
 import type { ConnectedAccount, InvestmentHolding, Transaction, Budget, SavingsGoal } from '../types'
 
+/**
+ * Demo data factory for PocketPlan.
+ *
+ * This file creates a realistic local finance dataset without contacting any
+ * external service. IDs are stable so repeated seeding can upsert records, and
+ * account IDs act like foreign keys between accounts, transactions, and
+ * holdings.
+ */
+
 // ---------------------------------------------------------------------------
 // Stable account IDs — used as foreign keys in transactions and holdings
 // ---------------------------------------------------------------------------
@@ -63,21 +72,27 @@ export function buildDemoTransactions(): Transaction[] {
   const txns: Transaction[] = []
 
   // ── 12-month historical loop ────────────────────────────────────────────
+  // Each pass creates one month of income, fixed bills, variable spending, and
+  // occasional events. The result gives charts, trends, budgets, and
+  // subscription detection enough history to behave like a real account.
   for (let mo = -11; mo <= 0; mo++) {
     const { year, month } = ymOffset(mo)
     const mk = `${year}-${String(month).padStart(2, '0')}`
 
-    // Holiday spending multiplier (Dec/Nov higher, summer moderate)
+    // Seasonal multipliers make demo analytics more believable: shopping rises
+    // around holidays and discretionary spending nudges up in summer.
     const isHoliday = month === 12 || month === 11
     const isSummer  = month === 6 || month === 7 || month === 8
     const shopMult  = isHoliday ? 2.2 : isSummer ? 1.3 : 1.0
 
-    // Small random jitter: ±10%
+    // Small random jitter prevents charts from looking copy-pasted while stable
+    // IDs still prevent duplicates when the data is reloaded.
     function jitter(base: number, pct = 0.10): number {
       return Math.round(base * (1 + (Math.random() * 2 - 1) * pct) * 100) / 100
     }
 
-    // Payroll — twice a month (1st and 15th)
+    // Payroll is intentionally predictable so income-vs-expense charts have a
+    // stable baseline across the full history.
     const salaryBase = 3200
     txns.push({
       id: `demo-tx-payroll-${mk}-1`,
@@ -206,7 +221,8 @@ export function buildDemoTransactions(): Transaction[] {
       ...synced(capitalOne, 'Capital One'),
     })
 
-    // Subscriptions (Netflix, Spotify, YouTube Premium)
+    // Subscriptions repeat monthly with the same merchant and amount. The
+    // analytics page uses these patterns to infer recurring services.
     txns.push({
       id: `demo-tx-netflix-${mk}`,
       title: 'Netflix',
@@ -251,6 +267,8 @@ export function buildDemoTransactions(): Transaction[] {
     }
 
     // ── Groceries — 3-5 trips per month ──────────────────────────────────
+    // Variable counts and store choices create category totals that change
+    // enough for spending comparisons to be interesting.
     const groceryStores = ['Whole Foods Market', "Trader Joe's", 'Costco', 'Kroger', 'Safeway']
     const groceryCount = Math.floor(Math.random() * 3) + 3
     const groceryDays = [4, 9, 14, 19, 25, 28].slice(0, groceryCount)
@@ -400,6 +418,8 @@ export function buildDemoTransactions(): Transaction[] {
     }
 
     // ── Savings transfer — most months ────────────────────────────────────
+    // Modeled as an expense because it leaves checking cash flow, even though
+    // in a full double-entry system this would be an internal transfer.
     const savingsAmt = [150, 200, 250, 300, 350, 400, 500][Math.floor(Math.random() * 7)]
     txns.push({
       id: `demo-tx-savings-${mk}`,
@@ -479,6 +499,8 @@ export function buildDemoTransactions(): Transaction[] {
 // Budgets — current month + 11 months of history
 // ---------------------------------------------------------------------------
 export function buildDemoBudgets(): Budget[] {
+  // Budget IDs include the month key so historical budget progress can be
+  // calculated for every generated month.
   const budgets: Budget[] = []
   for (let mo = -11; mo <= 0; mo++) {
     const mk = monthOffset(mo)
@@ -498,6 +520,8 @@ export function buildDemoBudgets(): Budget[] {
 // Goals — stable IDs with realistic progress based on history
 // ---------------------------------------------------------------------------
 export function buildDemoGoals(): SavingsGoal[] {
+  // Deadlines are relative to today so the demo stays fresh regardless of when
+  // someone opens the project.
   function futureDate(months: number): string {
     const d = new Date()
     d.setMonth(d.getMonth() + months)
@@ -517,6 +541,8 @@ export const buildManualDemoGoals = () =>
 // Holdings — STABLE IDs
 // ---------------------------------------------------------------------------
 export function buildDemoHoldings(): InvestmentHolding[] {
+  // Holding-level market math is precomputed here so components can render
+  // tables/charts without duplicating finance formulas.
   function h(
     id: string, accountId: string, symbol: string, name: string,
     quantity: number, averageCost: number, currentPrice: number,

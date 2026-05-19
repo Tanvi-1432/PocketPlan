@@ -4,14 +4,23 @@ import './index.css'
 import App from './App.tsx'
 import { initTheme } from './store/theme'
 
-// Apply persisted theme before first render to avoid flash
+/**
+ * Browser entry point.
+ *
+ * This file handles one-time boot concerns that must happen before React
+ * renders: restoring the theme class and migrating stale localStorage shapes.
+ */
+
+// Apply persisted theme before first render to avoid a light/dark flash.
 initTheme()
 
-// Migration: wipe stale localStorage data so the app always starts clean.
-// v1: wiped non-demo-prefixed IDs (random UUID era).
-// v2: wiped old single-occurrence demo transaction IDs (pre-12-month era).
-//     Old IDs looked like "demo-tx-netflix"; new IDs look like "demo-tx-netflix-2026-04".
-//     Detecting the old format: transaction IDs that match "demo-tx-<name>" with no trailing month.
+// ====================
+// localStorage Migration
+// ====================
+// Zustand persists each store under its own key. Demo data now relies on
+// stable, month-scoped IDs so reloading the demo can upsert instead of
+// duplicating rows. Older saved data can break that assumption, so this tiny
+// migration wipes only known stale shapes and then records that it ran.
 ;(function migrateStaleData() {
   const MIGRATION_KEY = 'pocketplan-migration-v2'
   if (localStorage.getItem(MIGRATION_KEY)) return  // already ran
@@ -25,13 +34,14 @@ initTheme()
       const items: { id: string }[] = Object.values(parsed?.state ?? {})[0] as { id: string }[]
       if (!Array.isArray(items)) continue
 
-      // Wipe if any non-demo IDs exist (v1 migration)
+      // v1: random UUID-era records cannot be safely reconciled with the
+      // deterministic demo seed, so remove the old persisted collection.
       const hasNonDemo = items.some((item) => item?.id && !item.id.startsWith('demo-'))
       if (hasNonDemo) { localStorage.removeItem(key); continue }
 
-      // Wipe if old short-form demo-tx IDs exist (v2 migration):
-      // old pattern: "demo-tx-<name>" — no dash-separated year segment at the end
-      // new pattern: "demo-tx-<name>-YYYY-MM" or "demo-tx-<name>-YYYY-MM-N"
+      // v2: old demo transactions used one ID per merchant. New demo history
+      // uses one ID per merchant/month so subscription detection can see a
+      // realistic timeline without producing duplicate keys.
       const OLD_TX_RE = /^demo-tx-[a-z]+$/
       const hasOldFormat = items.some((item) => item?.id && OLD_TX_RE.test(item.id))
       if (hasOldFormat) localStorage.removeItem(key)

@@ -1,6 +1,13 @@
 import { useSettingsStore } from '../store/settings'
 import type { DateFormatPreference } from '../types'
 
+/**
+ * Date formatting helpers.
+ *
+ * Transaction dates are stored as ISO strings for easy sorting and month
+ * grouping. Formatting is applied only at the UI edge using user preferences.
+ */
+
 function getSettings() {
   return useSettingsStore.getState().settings
 }
@@ -20,18 +27,19 @@ function applyDateFormat(d: Date, fmt: DateFormatPreference): string {
   }
 }
 
-// "2024-03-15" → formatted date per user preference
+// "2024-03-15" -> formatted date per user preference.
 export function formatDate(isoDate: string): string {
+  // Add midnight to avoid timezone shifts when parsing a date-only string.
   const d = new Date(isoDate + 'T00:00:00')
   return applyDateFormat(d, getSettings().dateFormat)
 }
 
-// "2024-03-15" → "2024-03"
+// "2024-03-15" -> "2024-03"; used as the common key for monthly grouping.
 export function toMonthKey(isoDate: string): string {
   return isoDate.slice(0, 7)
 }
 
-// "2024-03" → "Mar 2024"
+// "2024-03" -> "Mar 2024".
 export function formatMonth(monthKey: string): string {
   const [year, month] = monthKey.split('-')
   return new Date(Number(year), Number(month) - 1).toLocaleDateString('en-US', {
@@ -40,12 +48,12 @@ export function formatMonth(monthKey: string): string {
   })
 }
 
-// Returns current month key: "2024-03"
+// Returns current month key: "2024-03".
 export function currentMonthKey(): string {
   return toMonthKey(new Date().toISOString())
 }
 
-// Today's ISO date string: "2024-03-15"
+// Today's ISO date string: "2024-03-15".
 export function todayISO(): string {
   return new Date().toISOString().slice(0, 10)
 }

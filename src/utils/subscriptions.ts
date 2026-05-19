@@ -69,10 +69,18 @@ function amountsAreConsistent(amounts: number[]): boolean {
 }
 
 // ---------------------------------------------------------------------------
-// Main detection entry point
+/**
+ * Detect recurring subscriptions from transaction history.
+ *
+ * Detection uses three signals:
+ * - Merchant normalization groups statement variants together.
+ * - Repeated month/year spacing suggests a subscription cadence.
+ * - Similar amounts reduce false positives for unknown merchants.
+ */
 // ---------------------------------------------------------------------------
 export function detectSubscriptions(transactions: Transaction[]): DetectedSubscription[] {
-  // Only look at expenses in non-excluded categories
+  // Only look at expenses in non-excluded categories. Groceries, gas, shopping,
+  // and income categories produce too many false positives.
   const expenses = transactions.filter(
     (t) => t.type === 'expense' && !EXCLUDED_CATEGORIES.has(t.category)
   )
@@ -93,8 +101,8 @@ export function detectSubscriptions(transactions: Transaction[]): DetectedSubscr
     // Sort oldest → newest
     const sorted = [...txs].sort((a, b) => a.date.localeCompare(b.date))
 
-    // Deduplicate by month (keep the one closest to the median day)
-    // This prevents double-counting if someone manually re-added a synced tx
+    // Deduplicate by month. This prevents double-counting if someone manually
+    // re-added a synced transaction with the same merchant.
     const byMonth = new Map<string, Transaction>()
     for (const t of sorted) {
       const mk = t.date.slice(0, 7)
@@ -102,7 +110,8 @@ export function detectSubscriptions(transactions: Transaction[]): DetectedSubscr
     }
     const deduped = [...byMonth.values()].sort((a, b) => a.date.localeCompare(b.date))
 
-    // Minimum occurrences: 2 for known merchants, 3 for unknown ones
+    // Minimum occurrences: known merchants need less proof because the keyword
+    // itself is a strong subscription signal.
     const minOccurrences = known ? 2 : 3
     if (deduped.length < minOccurrences) continue
 
@@ -141,7 +150,8 @@ export function detectSubscriptions(transactions: Transaction[]): DetectedSubscr
     })
   }
 
-  // Sort by descending monthly cost
+  // Sort by descending monthly cost so the most important subscriptions appear
+  // first in Analytics.
   return subs.sort((a, b) => {
     const monthly = (s: DetectedSubscription) => {
       switch (s.frequency) {

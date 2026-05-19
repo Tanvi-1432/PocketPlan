@@ -3,6 +3,13 @@ import { formatCurrency, formatDate } from '../../utils'
 import { getFrequencyLabel } from '../../utils/recurring'
 import { Modal, Button, MerchantAvatar } from '../ui'
 
+/**
+ * Read-only transaction detail modal.
+ *
+ * It expands list-row metadata into a teachable summary: sync source,
+ * recurring status, auto-categorization, notes, and account context.
+ */
+
 interface TransactionDetailModalProps {
   transaction: Transaction | null
   onClose: () => void

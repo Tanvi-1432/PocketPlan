@@ -3,6 +3,12 @@ import type { ChartDataPoint } from '../../types'
 import { formatCurrency } from '../../utils'
 import Card, { CardHeader, CardBody } from '../ui/Card'
 
+/**
+ * Portfolio allocation donut chart.
+ *
+ * Expects each data point's value to already be a portfolio percentage.
+ */
+
 const COLORS = ['#6366f1','#10b981','#f59e0b','#3b82f6','#ec4899','#8b5cf6','#14b8a6','#f97316']
 
 interface AllocationChartProps {
@@ -52,6 +58,7 @@ export default function AllocationChart({ data, totalValue }: AllocationChartPro
               strokeWidth={0}
             >
               {data.map((_, i) => (
+                /* Cycle through the palette if demo holdings grow beyond the initial color list. */
                 <Cell key={i} fill={COLORS[i % COLORS.length]} />
               ))}
             </Pie>

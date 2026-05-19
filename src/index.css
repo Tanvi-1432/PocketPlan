@@ -3,6 +3,14 @@
 
 @variant dark (&:where(.dark, .dark *));
 
+/*
+ * Global styling system for PocketPlan.
+ *
+ * The app leans on Tailwind for most layout and spacing, while this file owns
+ * cross-cutting primitives: theme tokens, glass surfaces, safe-area handling,
+ * animations, and mobile browser fixes.
+ */
+
 /* ── Design tokens ──────────────────────────────────────── */
 :root {
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
@@ -13,7 +21,8 @@
   --glow-pink:     rgba(244, 114, 182, 0.14);
   --glow-mint:     rgba(52,  211, 153, 0.10);
 
-  /* Glass — light mode: bright frosted panel */
+  /* Glassmorphism tokens. Components reuse these through `.glass-card`,
+     `.glass-surface`, and sidebar/modal classes for a consistent frosted feel. */
   --glass-bg:        rgba(255, 255, 255, 0.60);
   --glass-border:    rgba(255, 255, 255, 0.70);
   --glass-blur:      24px;
@@ -37,6 +46,8 @@
 }
 
 .dark {
+  /* Dark mode overrides the same token names, so component classes do not need
+     separate light/dark implementations for glass and page chrome. */
   --glow-lavender: rgba(139, 92,  246, 0.20);
   --glow-blue:     rgba(59,  130, 246, 0.15);
   --glow-pink:     rgba(236, 72,  153, 0.12);
@@ -63,6 +74,9 @@
 
 /* ── Safe area variables ────────────────────────────────── */
 :root {
+  /* iPhone Safari exposes these env() values for notches and the home
+     indicator. Layout components add them to padding instead of hardcoding
+     device-specific spacing. */
   --safe-top:    env(safe-area-inset-top,    0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left:   env(safe-area-inset-left,   0px);
@@ -94,7 +108,8 @@ body {
   min-height: 100dvh;
   margin: 0;
   padding: 0;
-  /* Prevent white bounce/overscroll flash on iOS */
+  /* Prevent white bounce/overscroll flash on iOS. The fixed `.app-bg` supplies
+     the visible backdrop instead. */
   overscroll-behavior: none;
   overscroll-behavior-y: none;
   /* Prevent any child from blowing out horizontal layout */
@@ -119,6 +134,8 @@ body {
   z-index: -1;
   pointer-events: none;
   background: var(--page-bg);
+  /* Fixed attachment keeps the ambient background from scrolling independently
+     behind glass surfaces. */
   background-attachment: fixed;
 }
 
@@ -130,6 +147,8 @@ body {
 
 /* ── Mobile main content — top padding includes notch ───── */
 .mobile-main-pt {
+  /* Mobile top bar is fixed, so content needs matching top padding plus the
+     notch safe-area. Desktop sidebar layouts reset this below. */
   padding-top: calc(3.5rem + var(--safe-top));
 }
 
@@ -141,6 +160,8 @@ body {
 
 /* ── Glass utilities ────────────────────────────────────── */
 .glass-card {
+  /* Reusable card surface: translucent fill, blur, subtle border, and shadow.
+     Pages use this for panels without restyling the glass system each time. */
   background: var(--card-bg);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
@@ -169,6 +190,8 @@ body {
 
 /* ── Hero card — pastel glass ───────────────────────────── */
 .hero-pastel {
+  /* Hero uses stronger blur and layered pastel gradients so the top dashboard
+     card feels special while still matching the glass vocabulary. */
   backdrop-filter: blur(28px);
   -webkit-backdrop-filter: blur(28px);
   border: 1px solid rgba(255,255,255,0.45);
@@ -201,6 +224,8 @@ body {
 
 /* ── Mobile top bar ─────────────────────────────────────── */
 .mobile-topbar {
+  /* The top bar is fixed and translucent; padding-top extends it behind the
+     notch so there is no unpainted strip in iPhone Safari. */
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   background: rgba(248, 250, 252, 0.88);
@@ -256,6 +281,9 @@ body {
 }
 
 .pill-nav-hidden {
+  /* useNavVisibility toggles this class when scrolling down on mobile. The
+     transform moves the pill below the home indicator rather than display:none,
+     preserving smooth animation and layout stability. */
   transform: translateY(calc(100% + 24px + var(--safe-bottom, 0px)));
   opacity: 0;
   pointer-events: none;
@@ -286,6 +314,8 @@ body {
 
 /* ── Nav active state ───────────────────────────────────── */
 .nav-pill-active {
+  /* Active navigation is a soft inset pill instead of a heavy filled button,
+     matching the translucent sidebar and bottom-nav surfaces. */
   background: rgba(167, 139, 250, 0.16);
   box-shadow: 0 0 0 1px rgba(167, 139, 250, 0.25);
 }
@@ -299,6 +329,8 @@ body {
 
 /* ── Premium number display ─────────────────────────────── */
 .number-display {
+  /* Tabular numerals prevent currency totals from shifting width as values
+     update, which keeps cards and charts feeling stable. */
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.025em;
   font-feature-settings: 'tnum';
@@ -319,6 +351,8 @@ body {
 
 /* ── Hover lift ─────────────────────────────────────────── */
 .hover-lift {
+  /* Shared micro-interaction for cards. Kept in CSS so components can opt in
+     with one class instead of duplicating timing curves. */
   transition: transform 0.2s cubic-bezier(0.16,1,0.3,1), box-shadow 0.2s ease;
 }
 .hover-lift:hover {
@@ -330,6 +364,8 @@ body {
 }
 
 /* ── Slide/scale animations ─────────────────────────────── */
+/* Short entrance animations give loaded demo data a polished feel. Stagger
+   classes below offset sections without adding JS animation state. */
 @keyframes slide-up {
   from { opacity: 0; transform: translateY(14px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -357,6 +393,8 @@ body {
 
 /* ── Modal panel ────────────────────────────────────────── */
 .modal-panel {
+  /* Modal panels reuse the same glass language as cards but with a stronger
+     background so form fields remain readable over the blurred page. */
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(28px);
   -webkit-backdrop-filter: blur(28px);
@@ -384,6 +422,8 @@ body {
 }
 
 .modal-overlay {
+  /* Overlay blur separates modal work from the page without fully hiding the
+     financial context underneath. */
   background: rgba(15, 23, 42, 0.20);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);

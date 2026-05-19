@@ -1,17 +1,40 @@
-import type { Transaction } from '../../types'
-import { formatCurrency, formatDate } from '../../utils'
-import { Button, MerchantAvatar } from '../ui'
+import type { Transaction } from "../../types";
+import { formatCurrency, formatDate } from "../../utils";
+import { Button, MerchantAvatar } from "../ui";
+
+/**
+ * Single transaction row.
+ *
+ * The whole row opens the detail modal. Edit/delete controls stop propagation so
+ * clicking them does not also open details.
+ */
 
 interface TransactionItemProps {
-  transaction: Transaction
-  onEdit: (t: Transaction) => void
-  onDelete: (id: string) => void
-  onViewDetail: (t: Transaction) => void
+  transaction: Transaction;
+  onEdit: (t: Transaction) => void;
+  onDelete: (id: string) => void;
+  onViewDetail: (t: Transaction) => void;
 }
 
-export default function TransactionItem({ transaction, onEdit, onDelete, onViewDetail }: TransactionItemProps) {
-  const { id, title, amount, type, category, date, source, isRecurring, autoCategorized, categoryOverridden } = transaction
-  const isIncome = type === 'income'
+export default function TransactionItem({
+  transaction,
+  onEdit,
+  onDelete,
+  onViewDetail,
+}: TransactionItemProps) {
+  const {
+    id,
+    title,
+    amount,
+    type,
+    category,
+    date,
+    source,
+    isRecurring,
+    autoCategorized,
+    categoryOverridden,
+  } = transaction;
+  const isIncome = type === "income";
 
   return (
     <div
@@ -19,15 +42,20 @@ export default function TransactionItem({ transaction, onEdit, onDelete, onViewD
       onClick={() => onViewDetail(transaction)}
       role="button"
       tabIndex={0}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onViewDetail(transaction) }}
+      onKeyDown={(e) => {
+        // Keyboard support mirrors click behavior for accessible row details.
+        if (e.key === "Enter" || e.key === " ") onViewDetail(transaction);
+      }}
       aria-label={`View details for ${title}`}
     >
       <MerchantAvatar title={title} category={category} size="sm" />
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
-          <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">{title}</p>
-          {source === 'synced' && (
+          <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
+            {title}
+          </p>
+          {source === "synced" && (
             <span className="hidden sm:inline-flex shrink-0 text-[10px] font-medium bg-indigo-50 dark:bg-indigo-950/50 text-indigo-500 dark:text-indigo-400 px-1.5 py-0.5 rounded-full border border-indigo-100 dark:border-indigo-900">
               synced
             </span>
@@ -48,17 +76,40 @@ export default function TransactionItem({ transaction, onEdit, onDelete, onViewD
         </p>
       </div>
 
-      <span className={`text-sm font-semibold shrink-0 tabular-nums ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
-        {isIncome ? '+' : '−'}{formatCurrency(amount)}
+      <span
+        className={`text-sm font-semibold shrink-0 tabular-nums ${
+          isIncome
+            ? "text-emerald-600 dark:text-emerald-400"
+            : "text-red-500 dark:text-red-400"
+        }`}
+      >
+        {isIncome ? "+" : "−"}
+        {formatCurrency(amount)}
       </span>
 
       <div
         className="hidden sm:flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
         onClick={(e) => e.stopPropagation()}
       >
-        <Button variant="ghost" size="sm" onClick={() => onEdit(transaction)} aria-label="Edit transaction" className="min-w-[32px] min-h-[32px]">✎</Button>
-        <Button variant="ghost" size="sm" onClick={() => onDelete(id)} className="hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 min-w-[32px] min-h-[32px]" aria-label="Delete transaction">✕</Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onEdit(transaction)}
+          aria-label="Edit transaction"
+          className="min-w-[32px] min-h-[32px]"
+        >
+          ✎
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onDelete(id)}
+          className="hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 min-w-[32px] min-h-[32px]"
+          aria-label="Delete transaction"
+        >
+          ✕
+        </Button>
       </div>
     </div>
-  )
+  );
 }

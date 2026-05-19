@@ -3,6 +3,13 @@ import { persist } from 'zustand/middleware'
 import type { ConnectedAccount } from '../types'
 import { buildDemoAccounts } from '../constants/demoData'
 
+/**
+ * Connected account store.
+ *
+ * There is no real bank API in this demo. `syncAccounts` simulates the two
+ * phases a real integration would have: a loading/syncing state, then either
+ * initial account hydration or a timestamp refresh.
+ */
 interface AccountsState {
   accounts: ConnectedAccount[]
   isSyncing: boolean
@@ -34,6 +41,8 @@ export const useAccountsStore = create<AccountsState>()(
         })),
 
       syncAccounts: async () => {
+        // Mark every visible card as syncing immediately so the UI reflects
+        // work in progress during the simulated network delay.
         set((state) => ({
           isSyncing: true,
           accounts: state.accounts.map((a) => ({ ...a, status: 'syncing' as const })),
@@ -45,10 +54,10 @@ export const useAccountsStore = create<AccountsState>()(
         const current = get().accounts
 
         if (current.length === 0 || current.every((a) => a.status === 'syncing')) {
-          // First sync — load full demo set
+          // First sync: hydrate the full deterministic demo account set.
           set({ isSyncing: false, accounts: buildDemoAccounts(now) })
         } else {
-          // Re-sync — just refresh timestamps
+          // Re-sync: preserve balances/accounts and only refresh metadata.
           set((state) => ({
             isSyncing: false,
             accounts: state.accounts.map((a) => ({ ...a, lastSynced: now, status: 'connected' as const })),

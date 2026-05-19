@@ -21,6 +21,14 @@ const NET_WORTH_CARDS = [
   { label: 'Net Worth',   key: 'netWorth' as const,       color: 'text-emerald-700 dark:text-emerald-300', iconColor: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/50 dark:text-emerald-400', icon: <NetIcon d="M12 20V10M18 20V4M6 20v-4" /> },
 ]
 
+/**
+ * Accounts page.
+ *
+ * Responsibilities:
+ * - Display simulated connected accounts grouped by account type.
+ * - Derive net-worth cards from account balances.
+ * - Count synced transactions per account to show relationship depth.
+ */
 export default function Accounts() {
   const { accounts, isSyncing } = useAccountsStore()
   const { transactions } = useTransactionsStore()
@@ -31,6 +39,8 @@ export default function Accounts() {
   const investmentAccounts = useMemo(() => accounts.filter((a) => a.accountType === 'Brokerage' || a.accountType === 'Retirement'), [accounts])
 
   const txCountByAccount = useMemo(() => {
+    // Transactions reference accounts by accountId. Building a map keeps
+    // AccountCard rendering O(1) per card instead of filtering repeatedly.
     const map = new Map<string, number>()
     for (const t of transactions) {
       if (t.accountId) map.set(t.accountId, (map.get(t.accountId) ?? 0) + 1)

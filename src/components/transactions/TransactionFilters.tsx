@@ -3,6 +3,13 @@ import { ALL_CATEGORIES } from '../../constants'
 import { Select } from '../ui'
 import type { SelectOption } from '../ui'
 
+/**
+ * Filter controls for TransactionList.
+ *
+ * This component is intentionally controlled: parent/list state owns the filter
+ * object, and each select emits a shallowly patched copy.
+ */
+
 export interface TransactionFilters {
   month: string
   type: TransactionType | 'all'
@@ -31,6 +38,8 @@ function monthOptions(months: string[]): SelectOption[] {
   return [
     { value: 'all', label: 'All months' },
     ...months.map((m) => {
+      // Month values stay as YYYY-MM keys for filtering, while labels are
+      // formatted for people.
       const [year, month] = m.split('-')
       const label = new Date(Number(year), Number(month) - 1).toLocaleDateString('en-US', {
         month: 'short',

@@ -4,6 +4,13 @@ import { CATEGORY_COLORS } from '../../constants'
 import { formatCurrency } from '../../utils'
 import Card, { CardHeader, CardBody } from '../ui/Card'
 
+/**
+ * Dashboard spending-by-category chart.
+ *
+ * Receives category totals from transaction utilities and visualizes the top
+ * categories as both a donut and a compact ranked list.
+ */
+
 interface CategoryChartProps {
   data: CategorySummary[]
 }
@@ -40,6 +47,7 @@ export default function CategoryChart({ data }: CategoryChartProps) {
     )
   }
 
+  // Limit the dashboard chart to top categories so labels stay scannable.
   const top = data.slice(0, 6)
 
   return (
@@ -70,6 +78,8 @@ export default function CategoryChart({ data }: CategoryChartProps) {
           <div className="flex-1 w-full space-y-2.5">
             {top.map((entry) => {
               const total = top.reduce((s, e) => s + e.total, 0)
+              // Percent is relative to the visible top categories, matching the
+              // donut slices shown beside the list.
               const pct = total > 0 ? (entry.total / total) * 100 : 0
               const color = CATEGORY_COLORS[entry.category]
               return (

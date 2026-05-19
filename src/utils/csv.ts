@@ -1,6 +1,14 @@
 import type { Transaction, Budget, SavingsGoal, Category, TransactionType } from '../types'
 import { ALL_CATEGORIES } from '../constants'
 
+/**
+ * CSV import/export helpers.
+ *
+ * Export keeps enough metadata to round-trip local data. Import is intentionally
+ * forgiving: it accepts common bank column names and marks invalid rows instead
+ * of throwing so Settings can report partial success.
+ */
+
 // ---- Export ----
 
 function escapeCSV(val: string | number | boolean | undefined): string {
@@ -38,6 +46,8 @@ export function exportGoalsCSV(goals: SavingsGoal[]): string {
 }
 
 export function downloadCSV(filename: string, content: string): void {
+  // Browser-only download flow: create an object URL, click a temporary anchor,
+  // then release the URL to avoid leaking memory.
   const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' })
   const url  = URL.createObjectURL(blob)
   const a    = document.createElement('a')
@@ -61,6 +71,8 @@ export interface ParsedCSVRow {
 }
 
 function parseCSVLine(line: string): string[] {
+  // Minimal CSV parser with quoted-field support. This avoids pulling in a
+  // library for the small import format supported by the demo.
   const result: string[] = []
   let current = ''
   let inQuotes = false
@@ -93,9 +105,12 @@ export function parseTransactionsCSV(raw: string): ParsedCSVRow[] {
     const date  = get(row, 'date').slice(0, 10)
     const title = get(row, 'title') || get(row, 'description') || get(row, 'name')
     const rawAmount = parseFloat(get(row, 'amount').replace(/[$,]/g, ''))
+    // Imported negative amounts are normalized to positive expense amounts
+    // because PocketPlan stores direction separately in `type`.
     const amount = Math.abs(isNaN(rawAmount) ? 0 : rawAmount)
 
     const rawType = get(row, 'type').toLowerCase()
+    // If no explicit type exists, infer direction from the sign of amount.
     const type: TransactionType =
       rawType === 'income' ? 'income' :
       rawType === 'expense' ? 'expense' :

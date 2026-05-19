@@ -2,6 +2,13 @@ import type { Transaction, Budget, SavingsGoal, FinancialHealthScore } from '../
 import { filterByMonth, getTotalIncome, getTotalExpenses } from './transactions'
 import { currentMonthKey } from './date'
 
+/**
+ * Computes PocketPlan's educational financial health score.
+ *
+ * This is not financial advice. It is a weighted scorecard that turns common
+ * personal finance habits into explainable UI factors.
+ */
+
 function clamp(v: number, min = 0, max = 100): number {
   return Math.max(min, Math.min(max, v))
 }
@@ -28,6 +35,7 @@ export function computeHealthScore(
 
   // --- Factor 1: Savings rate (30 pts weight) ---
   const savingsRate = income > 0 ? (income - expenses) / income : 0
+  // A 50% savings rate maps to 100 points; lower rates scale linearly.
   const savingsScore = clamp(savingsRate * 200) // 50% rate = 100 pts
   const savingsSuggestion = savingsRate < 0.1
     ? 'Try to save at least 10-20% of your income each month.'
@@ -39,6 +47,8 @@ export function computeHealthScore(
   const monthBudgets = budgets.filter((b) => b.month === monthKey)
   let adherenceScore = 100
   if (monthBudgets.length > 0) {
+    // Budget adherence measures how many categories stayed within their limit,
+    // not how far each category went over. That keeps the factor easy to teach.
     const overBudget = monthBudgets.filter((b) => {
       const spent = thisMonthTxs
         .filter((t) => t.type === 'expense' && t.category === b.category)
@@ -59,6 +69,8 @@ export function computeHealthScore(
   )
   const emergencyScore = emergencyGoal
     ? clamp((emergencyGoal.currentAmount / emergencyGoal.targetAmount) * 100)
+    // Low neutral score nudges users to create a goal without treating missing
+    // demo data as catastrophic.
     : 20 // neutral if no emergency goal set
   const emergencySuggestion = !emergencyGoal
     ? 'Set up an emergency fund goal. Aim for 3-6 months of expenses.'
@@ -70,6 +82,8 @@ export function computeHealthScore(
   const prevExpenses = getTotalExpenses(prevMonthTxs)
   let consistencyScore = 80
   if (prevExpenses > 0 && expenses > 0) {
+    // Large swings reduce the score because unpredictable spending makes
+    // monthly planning harder.
     const delta = Math.abs(expenses - prevExpenses) / prevExpenses
     consistencyScore = clamp(100 - delta * 100)
   }
@@ -78,7 +92,8 @@ export function computeHealthScore(
     : undefined
 
   // --- Factor 5: Debt ratio (10 pts weight) ---
-  // Simplified: if expenses > income, debt score is low
+  // Simplified debt pressure proxy: if expenses exceed income this month, the
+  // user may be relying on debt/cash reserves to bridge the gap.
   const debtScore = income > 0 ? clamp((1 - Math.max(0, expenses - income) / Math.max(income, 1)) * 100) : 50
   const debtSuggestion = expenses > income
     ? 'You\'re spending more than you earn this month. Reduce expenses or increase income.'

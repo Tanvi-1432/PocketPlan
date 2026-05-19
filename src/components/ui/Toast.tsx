@@ -3,6 +3,13 @@ import { useTransactionsStore } from '../../store/transactions'
 import { useBudgetsStore } from '../../store/budgets'
 import { useGoalsStore } from '../../store/goals'
 
+/**
+ * Global toast container with undo support.
+ *
+ * Mounted once in App/Layout so any page can push a toast through the undo
+ * store. Undo handlers use store `getState()` to restore data without needing
+ * this component to subscribe to every domain store.
+ */
 export default function ToastContainer() {
   const { toasts, dismissToast } = useUndoStore()
 
@@ -10,6 +17,7 @@ export default function ToastContainer() {
     dismissToast(toastId)
     switch (action.type) {
       case 'DELETE_TRANSACTION':
+        // Upsert restores the exact deleted object, including its original ID.
         useTransactionsStore.getState().upsertTransaction(action.payload)
         break
       case 'DELETE_BUDGET':

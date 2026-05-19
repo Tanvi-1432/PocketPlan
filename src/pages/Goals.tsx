@@ -6,6 +6,14 @@ import GoalForm from '../components/goals/GoalForm'
 import GoalCard from '../components/goals/GoalCard'
 import ContributionForm from '../components/goals/ContributionForm'
 
+/**
+ * Savings Goals page.
+ *
+ * Responsibilities:
+ * - Manage goal create/edit and contribution modal state.
+ * - Split goals into active vs completed groups.
+ * - Delegate progress math and projected dates to goal components.
+ */
 export default function Goals() {
   const { goals, addGoal, updateGoal, deleteGoal, addContribution } = useGoalsStore()
 
@@ -25,10 +33,14 @@ export default function Goals() {
 
   function handleContribution(amount: number) {
     if (!contributing) return
+    // Store clamps contribution totals at targetAmount, so completed goals
+    // cannot exceed 100% even if the user enters a large contribution.
     addContribution(contributing.id, amount)
     setContributeModalOpen(false)
   }
 
+  // Derived groups keep rendering simple and make the page's information
+  // architecture obvious: unfinished goals first, completed goals second.
   const active = goals.filter((g) => g.currentAmount < g.targetAmount)
   const complete = goals.filter((g) => g.currentAmount >= g.targetAmount)
 

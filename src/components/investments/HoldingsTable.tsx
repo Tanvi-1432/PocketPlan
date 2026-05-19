@@ -2,6 +2,13 @@ import type { InvestmentHolding } from '../../types'
 import { formatCurrency } from '../../utils'
 import Card, { CardHeader, CardBody } from '../ui/Card'
 
+/**
+ * Holdings table.
+ *
+ * Renders lot-level investment data. Horizontal overflow is allowed so mobile
+ * users can inspect all numeric columns without squeezing the table.
+ */
+
 interface HoldingsTableProps {
   holdings: InvestmentHolding[]
 }
@@ -33,6 +40,7 @@ export default function HoldingsTable({ holdings }: HoldingsTableProps) {
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
             {holdings.map((h) => {
+              // Gain/loss sign controls both the color and explicit plus sign.
               const isPositive = h.gainLoss >= 0
               const gainClass = isPositive
                 ? 'text-emerald-600 dark:text-emerald-400'

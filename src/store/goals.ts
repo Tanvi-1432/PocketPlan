@@ -3,6 +3,12 @@ import { persist } from 'zustand/middleware'
 import { v4 as uuidv4 } from 'uuid'
 import type { SavingsGoal } from '../types'
 
+/**
+ * Savings goal store.
+ *
+ * Goal progress lives as `currentAmount` on each goal. Contributions are
+ * clamped to the target so UI progress never exceeds 100%.
+ */
 interface GoalsState {
   goals: SavingsGoal[]
   addGoal: (data: Omit<SavingsGoal, 'id' | 'currentAmount'>) => void
@@ -22,7 +28,8 @@ export const useGoalsStore = create<GoalsState>()(
           goals: [...state.goals, { ...data, id: uuidv4(), currentAmount: 0 }],
         })),
 
-      // Upsert by stable id — preserves user contributions if goal already exists
+      // Upsert by stable id. Demo goals use fixed IDs, which makes repeated
+      // demo loads replace the same goals instead of appending duplicates.
       upsertGoal: (goal) =>
         set((state) => {
           const exists = state.goals.some((g) => g.id === goal.id)
@@ -48,6 +55,8 @@ export const useGoalsStore = create<GoalsState>()(
         set((state) => ({
           goals: state.goals.map((g) =>
             g.id === id
+              // Cap at targetAmount so completed goals stay visually complete
+              // without showing impossible percentages like 128%.
               ? { ...g, currentAmount: Math.min(g.currentAmount + amount, g.targetAmount) }
               : g
           ),

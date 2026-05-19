@@ -9,11 +9,23 @@ import type { SelectOption } from '../components/ui'
 import BudgetForm from '../components/budgets/BudgetForm'
 import BudgetCard from '../components/budgets/BudgetCard'
 
+/**
+ * Builds the month selector from existing budget history plus the current month.
+ * Sorting descending keeps the newest month closest to the user's thumb/cursor.
+ */
 function buildMonthOptions(budgetMonths: string[], currentMonth: string): SelectOption[] {
   const months = [...new Set([currentMonth, ...budgetMonths])].sort((a, b) => b.localeCompare(a))
   return months.map((m) => ({ value: m, label: formatMonth(m) }))
 }
 
+/**
+ * Budgets page.
+ *
+ * Responsibilities:
+ * - Create/update one category budget per month.
+ * - Display spending progress calculated from transaction history.
+ * - Surface over-budget categories for the selected month.
+ */
 export default function Budgets() {
   const { transactions } = useTransactionsStore()
   const { budgets, setBudget, updateBudget, deleteBudget } = useBudgetsStore()
@@ -25,12 +37,16 @@ export default function Budgets() {
 
   const budgetMonths = useMemo(() => [...new Set(budgets.map((b) => b.month))], [budgets])
   const monthOptions = useMemo(() => buildMonthOptions(budgetMonths, currentMonth), [budgetMonths, currentMonth])
+  // `getBudgetProgress` is the important bridge between budget limits and real
+  // transaction spending. Changing selectedMonth recomputes the full view.
   const progressItems = useMemo(() => getBudgetProgress(budgets, transactions, selectedMonth), [budgets, transactions, selectedMonth])
 
   function openAdd() { setEditing(null); setModalOpen(true) }
   function openEdit(budget: Budget) { setEditing(budget); setModalOpen(true) }
 
   function handleSubmit(data: Omit<Budget, 'id'>) {
+    // New budgets use setBudget's category+month upsert. Edits target the
+    // existing budget ID so changing category/month is still possible.
     if (editing) { updateBudget(editing.id, data) } else { setBudget(data) }
     setModalOpen(false)
   }

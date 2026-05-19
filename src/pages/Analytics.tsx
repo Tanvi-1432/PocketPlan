@@ -20,6 +20,15 @@ import { currentMonthKey } from '../utils/date'
 import { CATEGORY_COLORS } from '../constants'
 import type { Category } from '../types'
 
+/**
+ * Analytics page.
+ *
+ * Responsibilities:
+ * - Convert transaction history into 6-month chart data.
+ * - Explain financial health through weighted score factors.
+ * - Detect recurring subscriptions from merchant/date/amount patterns.
+ */
+
 function SectionHeader({ title, sub }: { title: string; sub?: string }) {
   return (
     <div className="mb-5">
@@ -46,6 +55,7 @@ const CHART_TOOLTIP_STYLE = {
 function GradeCircle({ score, grade }: { score: number; grade: string }) {
   const r = 42
   const circ = 2 * Math.PI * r
+  // SVG stroke-dasharray turns the score into a circular progress ring.
   const dash = (score / 100) * circ
   const gradeColor =
     grade === 'A' ? '#10b981' :
@@ -81,6 +91,9 @@ export default function Analytics() {
 
   const monthKey      = currentMonthKey()
   const monthKeys6    = getLastNMonthKeys(6)
+
+  // All analytics below are pure derived values from stores. `useMemo` protects
+  // Recharts from receiving fresh array/object identities on unrelated renders.
   const health        = useMemo(() => computeHealthScore(transactions, budgets, goals), [transactions, budgets, goals])
   const comparisons   = useMemo(() => getSpendingComparisons(transactions, monthKey).slice(0, 5), [transactions, monthKey])
   const savingsTrend  = useMemo(() => getSavingsRateTrend(transactions, 6), [transactions])
@@ -91,6 +104,8 @@ export default function Analytics() {
   const monthlyChartData = useMemo(() =>
     monthKeys6.map((mk) => {
       const found = savingsTrend.find((s) => s.month === mk)
+      // Fill missing months with zeroes so chart spacing stays consistent even
+      // when the user has partial history.
       return {
         month: shortMonthLabel(mk),
         Income:   found?.totalIncome ?? 0,
@@ -103,6 +118,8 @@ export default function Analytics() {
 
   const topCategories = useMemo(() =>
     categoryTrend
+      // Pick categories by total 6-month spend to keep the multi-line chart
+      // readable instead of plotting every category.
       .map((ct) => ({ cat: ct.category, total: ct.months.reduce((s, m) => s + m.total, 0) }))
       .sort((a, b) => b.total - a.total)
       .slice(0, 4)
@@ -112,6 +129,7 @@ export default function Analytics() {
 
   const categoryChartData = useMemo(() =>
     monthKeys6.map((mk) => {
+      // Recharts expects one row per x-axis label with dynamic category keys.
       const row: Record<string, string | number> = { month: shortMonthLabel(mk) }
       for (const cat of topCategories) {
         const trend = categoryTrend.find((ct) => ct.category === cat)

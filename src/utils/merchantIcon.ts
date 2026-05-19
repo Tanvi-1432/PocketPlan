@@ -1,7 +1,14 @@
 import type { Category } from '../types'
 import { CATEGORY_COLORS } from '../constants'
 
-// Returns initials (1-2 chars) and a background color for a merchant
+/**
+ * Merchant avatar helpers.
+ *
+ * Transaction rows use these to show brand-like colors without shipping a logo
+ * library. Unknown merchants fall back to their category color.
+ */
+
+// Returns initials (1-2 chars) from the merchant title.
 export function getMerchantInitials(title: string): string {
   const words = title.trim().split(/\s+/).filter(Boolean)
   if (words.length === 0) return '?'
@@ -9,7 +16,7 @@ export function getMerchantInitials(title: string): string {
   return (words[0][0] + words[1][0]).toUpperCase()
 }
 
-// Predefined colors per merchant keyword for brand-like consistency
+// Predefined colors per merchant keyword for brand-like consistency.
 const MERCHANT_COLORS: Record<string, string> = {
   starbucks:  '#00704A',
   spotify:    '#1DB954',

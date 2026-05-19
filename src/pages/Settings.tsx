@@ -17,6 +17,15 @@ import { autoDetectCategory } from '../utils/categorization'
 import { Button } from '../components/ui'
 import type { ThemePreference, CurrencyCode, DateFormatPreference } from '../types'
 
+/**
+ * Settings page.
+ *
+ * Responsibilities:
+ * - Update persisted theme/formatting preferences.
+ * - Load/reset demo data.
+ * - Export local data to CSV and import transaction CSV files.
+ */
+
 // ── Small reusable primitives ──────────────────────────────────────────────
 
 function GlassSection({ title, icon, children }: { title: string; icon: string; children: React.ReactNode }) {
@@ -105,6 +114,8 @@ function LivePreview() {
   const sampleAmount = 3421.89
   const sampleDate   = todayISO()
 
+  // This component subscribes to settings so users see formatting changes
+  // immediately before leaving the page.
   return (
     <div className="rounded-2xl p-4 mt-5"
       style={{
@@ -152,6 +163,8 @@ export default function Settings() {
   const importRef = useRef<HTMLInputElement>(null)
 
   function handleThemeChange(p: ThemePreference) {
+    // Theme lives in two places: the theme store controls the DOM class, while
+    // settings records the preference alongside other display options.
     setPreference(p)
     updateSettings({ theme: p })
   }
@@ -177,6 +190,8 @@ export default function Settings() {
       let imported = 0
       for (const row of rows) {
         if (!row.valid) continue
+        // CSV rows with missing/Other categories get a best-effort category
+        // from the same merchant rules used by the transaction form.
         const { category: autoCat } = autoDetectCategory(row.title, row.type)
         addTransaction({
           title: row.title,
@@ -190,6 +205,7 @@ export default function Settings() {
         })
         imported++
       }
+      // Reset the input so selecting the same file again still fires onChange.
       alert(`Imported ${imported} of ${rows.length} transactions.${rows.length - imported > 0 ? ` ${rows.length - imported} rows had errors.` : ''}`)
       if (importRef.current) importRef.current.value = ''
     }

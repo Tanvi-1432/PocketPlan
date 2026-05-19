@@ -5,6 +5,13 @@ import { useInvestmentsStore } from '../../store/investments'
 import { buildDemoTransactions, buildDemoBudgets, buildDemoHoldings } from '../../constants/demoData'
 import { Button } from '../ui'
 
+/**
+ * Simulated account sync button.
+ *
+ * A real app would call a bank aggregator here. PocketPlan instead syncs demo
+ * accounts, transactions, budgets, and holdings so the connected-account flow
+ * can be understood without credentials.
+ */
 export default function SyncButton() {
   const { isSyncing, accounts, syncAccounts } = useAccountsStore()
   const { upsertTransaction } = useTransactionsStore()
@@ -14,13 +21,16 @@ export default function SyncButton() {
   async function handleSync() {
     await syncAccounts()
 
-    // Remove stale synced transactions (old UUID-ID ones) before upserting stable-ID ones
+    // Remove synced transactions first so legacy/random imported IDs cannot
+    // coexist with the stable demo transaction IDs.
     const { transactions, deleteTransaction } = useTransactionsStore.getState()
     transactions
       .filter((t) => t.source === 'synced')
       .forEach((t) => deleteTransaction(t.id))
 
     const now = new Date().toISOString()
+    // Seed related domains after accounts exist. Transactions reference account
+    // IDs; holdings reference brokerage account IDs.
     buildDemoTransactions().forEach((t) => upsertTransaction({ ...t, importedAt: now }))
     buildDemoBudgets().forEach((b) => setBudget(b))
     buildDemoHoldings().forEach((h) => upsertHolding(h))

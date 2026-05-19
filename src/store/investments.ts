@@ -3,6 +3,13 @@ import { persist } from 'zustand/middleware'
 import type { InvestmentHolding } from '../types'
 import { buildDemoHoldings } from '../constants/demoData'
 
+/**
+ * Investment holdings store.
+ *
+ * Holdings are persisted independently from accounts but reference account IDs
+ * from demo data. This mirrors a real finance app where account balances and
+ * portfolio lots often arrive from related API resources.
+ */
 interface InvestmentsState {
   holdings: InvestmentHolding[]
   addHolding: (holding: InvestmentHolding) => void
@@ -23,6 +30,8 @@ export const useInvestmentsStore = create<InvestmentsState>()(
 
       upsertHolding: (holding) =>
         set((state) => {
+          // Stable demo IDs let the seed routine be safely repeated without
+          // creating duplicate rows in the holdings table.
           const exists = state.holdings.some((h) => h.id === holding.id)
           if (exists) {
             return { holdings: state.holdings.map((h) => (h.id === holding.id ? holding : h)) }

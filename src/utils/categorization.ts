@@ -1,5 +1,12 @@
 import type { Category, TransactionType } from '../types'
 
+/**
+ * Merchant-name category detection.
+ *
+ * This powers form blur suggestions and CSV import cleanup. Rules are simple on
+ * purpose: readable keyword lists are easier to maintain than opaque scoring.
+ */
+
 interface CategorizationRule {
   keywords: string[]
   category: Category
@@ -56,6 +63,8 @@ export function autoDetectCategory(title: string, type: TransactionType): { cate
   const lower = title.toLowerCase()
 
   for (const rule of RULES) {
+    // Type-specific rules keep income keywords like "payroll" from affecting
+    // expense rows with similar text.
     if (rule.type && rule.type !== type) continue
     if (rule.keywords.some((kw) => lower.includes(kw))) {
       return { category: rule.category, confident: true }

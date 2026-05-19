@@ -2,6 +2,14 @@ import type { Transaction, Budget, CashFlowForecast } from '../types'
 import { filterByMonth, getTotalIncome, getTotalExpenses } from './transactions'
 import { currentMonthKey } from './date'
 
+/**
+ * Cash-flow forecast utilities.
+ *
+ * The forecast blends actual month-to-date transactions, known recurring
+ * transactions, remaining budget room, and current cash balance into a simple
+ * month-end projection.
+ */
+
 function daysInMonth(year: number, month: number): number {
   return new Date(year, month, 0).getDate()
 }
@@ -18,6 +26,8 @@ export function computeCashFlowForecast(
   const monthKey = currentMonthKey()
   const monthTxs = filterByMonth(transactions, monthKey)
 
+  // Actuals anchor the forecast: everything else estimates what may happen for
+  // the rest of the month.
   const incomeToDate   = getTotalIncome(monthTxs)
   const expensesToDate = getTotalExpenses(monthTxs)
   const balanceToDate  = incomeToDate - expensesToDate
@@ -40,10 +50,12 @@ export function computeCashFlowForecast(
     }
   }
 
-  // Daily average spend so far this month
+  // Daily average spend so far this month. Later we only use half of this as a
+  // run-rate because budgets already cover planned category spending.
   const avgDailyExpense = day > 0 ? expensesToDate / day : 0
 
-  // Recurring income not yet received this month — look for income-type recurring in transactions
+  // Recurring income not yet received this month. Series IDs let us determine
+  // whether this month's occurrence already exists in the transaction list.
   const recurringIncome = transactions
     .filter((t) => t.isRecurring && t.type === 'income' && t.recurringFrequency === 'monthly')
     .reduce((sum, t) => {
@@ -52,7 +64,7 @@ export function computeCashFlowForecast(
       return appearedThisMonth ? sum : sum + t.amount
     }, 0)
 
-  // Remaining recurring expenses from recurring transactions flagged in the store
+  // Remaining recurring expenses from recurring transactions flagged in the store.
   const recurringExpenses = transactions
     .filter((t) => t.isRecurring && t.type === 'expense' && t.recurringFrequency === 'monthly')
     .reduce((sum, t) => {
@@ -60,7 +72,8 @@ export function computeCashFlowForecast(
       return appearedThisMonth ? sum : sum + t.amount
     }, 0)
 
-  // Budget-based remaining expense estimate (conservative)
+  // Budget-based remaining estimate: category limits act as a spending plan,
+  // while actual expenses reduce the room left for each category.
   const budgetBasedRemaining = budgets
     .filter((b) => b.month === monthKey)
     .reduce((sum, b) => {
@@ -72,6 +85,8 @@ export function computeCashFlowForecast(
     }, 0)
 
   const projectedAdditionalExpenses = Math.max(
+    // Use the larger of recurring/run-rate or budget room so projections do not
+    // become overly optimistic halfway through a quiet month.
     recurringExpenses + avgDailyExpense * remaining * 0.5,
     budgetBasedRemaining * 0.7,
   )
@@ -80,7 +95,7 @@ export function computeCashFlowForecast(
   const projectedExpenses  = expensesToDate + projectedAdditionalExpenses
   const projectedBalance   = cashBalance + (projectedIncome - projectedExpenses)
 
-  // Safe to spend: (current cash + expected income - committed expenses) / remaining days
+  // Safe to spend: cash after committed costs divided by remaining days.
   const committed = recurringExpenses + budgetBasedRemaining * 0.3
   const available = Math.max(0, cashBalance - committed)
   const safeToSpendDaily = remaining > 0 ? available / remaining : 0

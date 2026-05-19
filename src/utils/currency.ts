@@ -1,6 +1,13 @@
 import { useSettingsStore } from '../store/settings'
 import type { CurrencyCode } from '../types'
 
+/**
+ * Currency formatting helpers.
+ *
+ * These helpers read the latest settings snapshot directly from Zustand so they
+ * can be used in utilities as well as React components.
+ */
+
 const CURRENCY_LOCALES: Record<CurrencyCode, string> = {
   USD: 'en-US',
   EUR: 'de-DE',
@@ -9,7 +16,7 @@ const CURRENCY_LOCALES: Record<CurrencyCode, string> = {
   AUD: 'en-AU',
 }
 
-// Returns current settings snapshot without subscribing (safe in non-React contexts)
+// Returns current settings snapshot without subscribing (safe in non-React contexts).
 function getSettings() {
   return useSettingsStore.getState().settings
 }
@@ -19,6 +26,8 @@ export function formatCurrency(amount: number): string {
   const locale = CURRENCY_LOCALES[currency] ?? 'en-US'
 
   if (compactNumbers && Math.abs(amount) >= 1000) {
+    // Compact notation powers settings like "$1.2K" while preserving the
+    // selected currency and locale rules.
     return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency,

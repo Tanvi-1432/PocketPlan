@@ -3,6 +3,13 @@ import { persist } from 'zustand/middleware'
 
 type ThemePreference = 'light' | 'dark' | 'system'
 
+/**
+ * Theme store.
+ *
+ * Theme is intentionally separate from formatting settings because it must
+ * update the `<html>` class before React paints. Components read this store for
+ * controls; `initTheme` reads localStorage directly during boot.
+ */
 interface ThemeState {
   preference: ThemePreference
   setPreference: (p: ThemePreference) => void
@@ -11,13 +18,15 @@ interface ThemeState {
 
 function applyThemeColor(isDark: boolean) {
   const color = isDark ? '#0b1020' : '#f6f2ff'
-  // Update both media-targeted tags and any bare tag
+  // Keep mobile browser chrome aligned with the active theme color.
   document.querySelectorAll('meta[name="theme-color"]').forEach((el) => {
     el.setAttribute('content', color)
   })
 }
 
 function applyTheme(preference: ThemePreference) {
+  // `system` resolves at the moment the theme is applied. The app also calls
+  // this during boot so Tailwind's `dark:` selectors are correct immediately.
   const isDark =
     preference === 'dark' ||
     (preference === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
@@ -36,6 +45,8 @@ export const useThemeStore = create<ThemeState>()(
       },
 
       toggleTheme: () => {
+        // Toggle from the resolved visual state, not merely the stored value,
+        // so "system while currently dark" flips to explicit light mode.
         const current = get().preference
         const isDarkNow =
           current === 'dark' ||
@@ -49,7 +60,7 @@ export const useThemeStore = create<ThemeState>()(
   )
 )
 
-// Call once on app boot to restore persisted theme
+// Call once on app boot to restore persisted theme before React renders.
 export function initTheme() {
   const stored = localStorage.getItem('pocketplan-theme')
   if (stored) {

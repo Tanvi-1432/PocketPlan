@@ -1,6 +1,14 @@
 import type { Transaction, Category, SpendingComparison, CategoryTrend, MonthlySummary } from '../types'
 import { filterByMonth, getTotalIncome, getTotalExpenses, getMonthlySummaries } from './transactions'
 
+/**
+ * Multi-month analytics helpers.
+ *
+ * These functions convert transaction history into comparison and chart shapes
+ * for the Analytics page. They stay pure so memoized React components can
+ * recompute only when the source arrays change.
+ */
+
 function prevMonthKey(monthKey: string): string {
   const [year, month] = monthKey.split('-').map(Number)
   const d = new Date(year, month - 2, 1)
@@ -22,6 +30,8 @@ export function getSpendingComparisons(
       const thisMonth = thisTxs.filter((t) => t.category === cat).reduce((s, t) => s + t.amount, 0)
       const lastMonth = prevTxs.filter((t) => t.category === cat).reduce((s, t) => s + t.amount, 0)
       const deltaAmount = thisMonth - lastMonth
+      // When last month was zero, any current spending is treated as a 100%
+      // increase instead of dividing by zero.
       const delta = lastMonth > 0 ? (deltaAmount / lastMonth) * 100 : (thisMonth > 0 ? 100 : 0)
       return { category: cat, thisMonth, lastMonth, delta, deltaAmount }
     })
@@ -33,7 +43,7 @@ export function getCategoryTrends(
   transactions: Transaction[],
   months: number = 6,
 ): CategoryTrend[] {
-  // Get last N months in order
+  // Get last N month keys in chronological order for stable chart axes.
   const now = new Date()
   const monthKeys: string[] = []
   for (let i = months - 1; i >= 0; i--) {
@@ -53,6 +63,7 @@ export function getCategoryTrends(
 
     const last  = monthData[monthData.length - 1]?.total ?? 0
     const prev  = monthData[monthData.length - 2]?.total ?? 0
+    // Trend delta compares the newest two months for quick direction labels.
     const delta = prev > 0 ? ((last - prev) / prev) * 100 : 0
 
     return { category: cat, months: monthData, delta }

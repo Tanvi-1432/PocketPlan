@@ -6,6 +6,13 @@ import type { MonthlyChartPoint } from '../../types'
 import { formatMonth, formatCompactCurrency } from '../../utils'
 import Card, { CardHeader, CardBody } from '../ui/Card'
 
+/**
+ * Dashboard monthly income/expense bar chart.
+ *
+ * Converts YYYY-MM keys into readable labels at the component edge, keeping
+ * utility output reusable for other analytics.
+ */
+
 interface MonthlyChartProps {
   data: MonthlyChartPoint[]
 }

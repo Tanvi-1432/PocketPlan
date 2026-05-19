@@ -1,5 +1,12 @@
 import type { RecurringFrequency, Transaction } from '../types'
 
+/**
+ * Recurring transaction helpers.
+ *
+ * These helpers power manual recurring transactions and subscription-style
+ * monthly equivalents used in analytics.
+ */
+
 export function addFrequencyDays(dateStr: string, freq: RecurringFrequency): string {
   const d = new Date(dateStr + 'T00:00:00')
   switch (freq) {
@@ -28,8 +35,12 @@ export function computeNextOccurrence(transaction: Transaction): string | undefi
   return addFrequencyDays(transaction.date, transaction.recurringFrequency)
 }
 
-// Generate all upcoming occurrences of a recurring transaction up to a horizon date.
-// Does NOT generate entries that already exist in the transactions array.
+/**
+ * Generate upcoming occurrences of a recurring transaction up to a horizon.
+ *
+ * Existing dates in the same series are skipped, which prevents creating
+ * duplicates if generation runs more than once.
+ */
 export function generateUpcomingRecurring(
   source: Transaction,
   existingTransactions: Transaction[],
@@ -50,6 +61,7 @@ export function generateUpcomingRecurring(
     if (!existingDates.has(current)) {
       results.push({
         ...source,
+        // Deterministic occurrence IDs make each future date stable.
         id: `${source.recurringSeriesId}-${current}`,
         date: current,
         source: 'manual',
@@ -62,7 +74,8 @@ export function generateUpcomingRecurring(
   return results
 }
 
-// Monthly cost equivalent for any frequency
+// Monthly cost equivalent for any frequency; useful for comparing subscriptions
+// with different billing cadences on one chart/card.
 export function monthlyEquivalent(amount: number, freq: RecurringFrequency): number {
   switch (freq) {
     case 'daily':    return amount * 30.44

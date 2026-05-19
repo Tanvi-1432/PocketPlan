@@ -3,6 +3,15 @@ import type { ReactNode } from 'react'
 import { useThemeStore } from '../store/theme'
 import { useNavVisibility } from '../hooks'
 
+/**
+ * Application layout and navigation shell.
+ *
+ * Responsibilities:
+ * - Desktop: fixed glass sidebar with full navigation.
+ * - Mobile: top bar, dropdown menu, and auto-hiding bottom pill nav.
+ * - Theme toggle entry points shared across screen sizes.
+ */
+
 type Page = 'dashboard' | 'transactions' | 'budgets' | 'goals' | 'accounts' | 'investments' | 'analytics' | 'settings'
 
 interface NavItem {
@@ -24,6 +33,7 @@ const NAV_ITEMS: NavItem[] = [
 
 const MOBILE_NAV_ITEMS = NAV_ITEMS.slice(0, 5)
 
+// Icons are stored as path data so nav metadata stays compact and easy to scan.
 function NavIcon({ d, size = 'md' }: { d: string; size?: 'sm' | 'md' }) {
   const sz = size === 'sm' ? 'w-[17px] h-[17px]' : 'w-[17px] h-[17px]'
   return (
@@ -35,6 +45,8 @@ function NavIcon({ d, size = 'md' }: { d: string; size?: 'sm' | 'md' }) {
 
 function ThemeToggle({ compact = false }: { compact?: boolean }) {
   const { preference, toggleTheme } = useThemeStore()
+  // Resolve "system" into the current visual state so the button label/icon
+  // describes what clicking will change from.
   const isDark =
     preference === 'dark' ||
     (preference === 'system' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches)
@@ -70,9 +82,13 @@ interface LayoutProps {
 
 export default function Layout({ currentPage, onNavigate, children }: LayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  // Mobile bottom nav listens to scroll direction and resets on page changes.
   const navVisible = useNavVisibility(currentPage)
 
   function navigate(page: Page) {
+    // Centralize navigation side effects: change page and close the mobile menu
+    // so every nav surface behaves consistently.
     onNavigate(page)
     setMobileMenuOpen(false)
   }

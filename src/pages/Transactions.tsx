@@ -7,6 +7,14 @@ import TransactionForm from '../components/transactions/TransactionForm'
 import TransactionList from '../components/transactions/TransactionList'
 import TransactionDetailModal from '../components/transactions/TransactionDetailModal'
 
+/**
+ * Transactions page.
+ *
+ * Responsibilities:
+ * - Own add/edit/detail modal state.
+ * - Pass persisted transaction data into the searchable/filterable list.
+ * - Delete transactions with a toast payload that can be undone.
+ */
 export default function Transactions() {
   const { transactions, addTransaction, updateTransaction, deleteTransaction } = useTransactionsStore()
   const { pushToast } = useUndoStore()
@@ -19,6 +27,8 @@ export default function Transactions() {
   function openEdit(t: Transaction) { setEditing(t); setModalOpen(true) }
 
   function handleSubmit(data: Omit<Transaction, 'id'>) {
+    // The same form handles create and edit. Store methods hide whether the
+    // transaction needs a new UUID or an update to an existing record.
     if (editing) { updateTransaction(editing.id, data) } else { addTransaction(data) }
     setModalOpen(false)
   }
@@ -26,6 +36,8 @@ export default function Transactions() {
   function handleDelete(id: string) {
     const tx = transactions.find((t) => t.id === id)
     if (!tx) return
+    // Capture the full deleted transaction before removal so the undo toast has
+    // everything it needs to restore the item later.
     deleteTransaction(id)
     pushToast(`"${tx.title}" deleted`, { type: 'DELETE_TRANSACTION', payload: tx })
   }

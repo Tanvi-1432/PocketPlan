@@ -12,15 +12,26 @@ import AllocationChart from '../components/investments/AllocationChart'
 import HoldingsTable from '../components/investments/HoldingsTable'
 import SyncButton from '../components/accounts/SyncButton'
 
+/**
+ * Investments page.
+ *
+ * Responsibilities:
+ * - Summarize holdings into portfolio value and gains/losses.
+ * - Render allocation chart data derived from market value percentages.
+ * - Offer account sync when no demo investment data exists yet.
+ */
 export default function Investments() {
   const { holdings } = useInvestmentsStore()
   const { accounts } = useAccountsStore()
 
+  // Holding rows already contain marketValue and gain/loss, so page-level
+  // calculations are simple sums and percentages.
   const totalValue    = useMemo(() => getTotalPortfolioValue(holdings), [holdings])
   const totalGainLoss = useMemo(() => getTotalGainLoss(holdings), [holdings])
   const gainLossPct   = useMemo(() => getOverallGainLossPercent(holdings), [holdings])
   const allocation    = useMemo(() => getAllocationChartData(holdings), [holdings])
 
+  // One sign drives both total gain/loss and return styling.
   const isPositive = totalGainLoss >= 0
 
   return (
