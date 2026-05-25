@@ -28,8 +28,11 @@ export function buildDemoAccounts(lastSynced: string = new Date().toISOString())
     { id: DEMO_ACCOUNT_IDS.chaseChecking, institutionName: 'Chase',       accountName: 'Total Checking', accountType: 'Checking',    balance: 3250.75,  currency: 'USD', lastSynced, status: 'connected' },
     { id: DEMO_ACCOUNT_IDS.chaseSavings,  institutionName: 'Chase',       accountName: 'Savings',        accountType: 'Savings',     balance: 8400.00,  currency: 'USD', lastSynced, status: 'connected' },
     { id: DEMO_ACCOUNT_IDS.capitalOne,    institutionName: 'Capital One', accountName: 'Quicksilver',    accountType: 'Credit Card', balance: -642.35,  currency: 'USD', lastSynced, status: 'connected' },
-    { id: DEMO_ACCOUNT_IDS.fidelity,      institutionName: 'Fidelity',    accountName: 'Brokerage',      accountType: 'Brokerage',   balance: 15680.42, currency: 'USD', lastSynced, status: 'connected' },
-    { id: DEMO_ACCOUNT_IDS.robinhood,     institutionName: 'Robinhood',   accountName: 'Investing',      accountType: 'Brokerage',   balance: 4275.90,  currency: 'USD', lastSynced, status: 'connected' },
+    // Brokerage balances mirror the current market value of demo holdings for
+    // each account. That keeps Dashboard, Accounts, and Investments totals
+    // consistent while holdings still provide the detailed portfolio view.
+    { id: DEMO_ACCOUNT_IDS.fidelity,      institutionName: 'Fidelity',    accountName: 'Brokerage',      accountType: 'Brokerage',   balance: 22321.26, currency: 'USD', lastSynced, status: 'connected' },
+    { id: DEMO_ACCOUNT_IDS.robinhood,     institutionName: 'Robinhood',   accountName: 'Investing',      accountType: 'Brokerage',   balance: 16141.16, currency: 'USD', lastSynced, status: 'connected' },
   ]
 }
 

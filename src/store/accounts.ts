@@ -57,11 +57,9 @@ export const useAccountsStore = create<AccountsState>()(
           // First sync: hydrate the full deterministic demo account set.
           set({ isSyncing: false, accounts: buildDemoAccounts(now) })
         } else {
-          // Re-sync: preserve balances/accounts and only refresh metadata.
-          set((state) => ({
-            isSyncing: false,
-            accounts: state.accounts.map((a) => ({ ...a, lastSynced: now, status: 'connected' as const })),
-          }))
+          // Re-sync: refresh the canonical demo account balances as well as
+          // timestamps so account totals stay aligned with demo holdings.
+          set({ isSyncing: false, accounts: buildDemoAccounts(now) })
         }
       },
 

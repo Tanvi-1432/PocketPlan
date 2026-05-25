@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { Page } from '../components/Layout'
 import { useTransactionsStore } from '../store/transactions'
 import { useBudgetsStore } from '../store/budgets'
@@ -6,9 +6,6 @@ import { useAccountsStore } from '../store/accounts'
 import { useInvestmentsStore } from '../store/investments'
 import { useDemoData } from '../hooks'
 import {
-  getTotalIncome,
-  getTotalExpenses,
-  getBalance,
   filterByMonth,
   groupByCategory,
   getMonthlyChartData,
@@ -18,7 +15,13 @@ import {
   generateInsights,
 } from '../utils'
 import { getBudgetProgress } from '../utils/budgets'
-import { getNetWorth, getTotalPortfolioValue } from '../utils/investments'
+import {
+  calculateMonthlyBalance,
+  calculateMonthlyExpenses,
+  calculateMonthlyIncome,
+  calculateNetWorth,
+  validateFinancialTotals,
+} from '../utils/financialTotals'
 import { computeCashFlowForecast } from '../utils/forecast'
 import { getSpendingComparisons } from '../utils/trends'
 import SummaryCard from '../components/dashboard/SummaryCard'
@@ -93,18 +96,21 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
   // Memoization keeps chart arrays and summary calculations stable between
   // renders unless their source store data changes.
   const monthlyTransactions = useMemo(() => filterByMonth(transactions, monthKey), [transactions, monthKey])
-  const income    = useMemo(() => getTotalIncome(monthlyTransactions),   [monthlyTransactions])
-  const expenses  = useMemo(() => getTotalExpenses(monthlyTransactions), [monthlyTransactions])
-  const balance   = useMemo(() => getBalance(monthlyTransactions),       [monthlyTransactions])
+  const income    = useMemo(() => calculateMonthlyIncome(transactions, monthKey),   [transactions, monthKey])
+  const expenses  = useMemo(() => calculateMonthlyExpenses(transactions, monthKey), [transactions, monthKey])
+  const balance   = useMemo(() => calculateMonthlyBalance(transactions, monthKey),  [transactions, monthKey])
   const categoryData       = useMemo(() => groupByCategory(monthlyTransactions.filter((t) => t.type === 'expense')), [monthlyTransactions])
   const monthlyChartData   = useMemo(() => getMonthlyChartData(transactions), [transactions])
   const recentTransactions = useMemo(() => getRecentTransactions(transactions, 5), [transactions])
   const budgetProgress     = useMemo(() => getBudgetProgress(budgets, transactions, monthKey), [budgets, transactions, monthKey])
-  const netWorth           = useMemo(() => getNetWorth(accounts), [accounts])
-  const portfolioValue     = useMemo(() => getTotalPortfolioValue(holdings), [holdings])
+  const netWorth           = useMemo(() => calculateNetWorth(accounts, holdings), [accounts, holdings])
   const insights           = useMemo(() => generateInsights(transactions, budgets, monthKey), [transactions, budgets, monthKey])
   const forecast           = useMemo(() => computeCashFlowForecast(transactions, budgets, netWorth.cash), [transactions, budgets, netWorth.cash])
   const comparisons        = useMemo(() => getSpendingComparisons(transactions, monthKey).slice(0, 3), [transactions, monthKey])
+
+  useEffect(() => {
+    validateFinancialTotals({ accounts, holdings })
+  }, [accounts, holdings])
 
   // Find the latest sync timestamp across all connected demo accounts so the
   // hero can show one concise "last synced" label.
@@ -115,10 +121,6 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
         return a.lastSynced > latest ? a.lastSynced : latest
       }, null)
     : null
-
-  // Prefer holding-level portfolio value when holdings are loaded; fall back to
-  // brokerage account balances if only account data exists.
-  const totalNetWorth = netWorth.cash + (portfolioValue || netWorth.investments) - netWorth.creditCardDebt
 
   function handleDismissOnboarding() {
     // Persist dismissal outside Zustand because onboarding is local UI state,
@@ -214,7 +216,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
               </p>
               <h1 className="text-3xl sm:text-4xl font-bold number-display text-violet-900 dark:text-white"
                 style={{ letterSpacing: '-0.03em' }}>
-                {formatCurrency(totalNetWorth)}
+                {formatCurrency(netWorth.netWorth)}
               </h1>
               <p className="text-sm mt-1 text-violet-500 dark:text-violet-300">Net worth</p>
             </div>
@@ -288,9 +290,9 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 animate-slide-up">
           {[
             { label: 'Cash',        value: netWorth.cash,                                                          accentBg: 'rgba(148,163,184,0.12)', accentBorder: 'rgba(148,163,184,0.22)', accentIcon: '#94a3b8', textColor: 'text-slate-700 dark:text-slate-200', iconD: 'M3 9a2 2 0 012-2h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9zm0 0V7a2 2 0 012-2h2M16 5H8a2 2 0 00-2 2' },
-            { label: 'Investments', value: portfolioValue || netWorth.investments,                                 accentBg: 'rgba(129,140,248,0.14)', accentBorder: 'rgba(129,140,248,0.25)', accentIcon: '#6366f1', textColor: 'text-indigo-700 dark:text-indigo-300', iconD: 'M3 17l4-8 4 4 4-6 4 3' },
+            { label: 'Investments', value: netWorth.investments,                                                  accentBg: 'rgba(129,140,248,0.14)', accentBorder: 'rgba(129,140,248,0.25)', accentIcon: '#6366f1', textColor: 'text-indigo-700 dark:text-indigo-300', iconD: 'M3 17l4-8 4 4 4-6 4 3' },
             { label: 'Credit Debt', value: netWorth.creditCardDebt,                                               accentBg: 'rgba(251,113,133,0.12)', accentBorder: 'rgba(251,113,133,0.22)', accentIcon: '#f43f5e', textColor: 'text-rose-600 dark:text-rose-400',   iconD: 'M1 6h22v13a2 2 0 01-2 2H3a2 2 0 01-2-2V6zm0 5h22' },
-            { label: 'Net Worth',   value: netWorth.cash + (portfolioValue || netWorth.investments) - netWorth.creditCardDebt, accentBg: 'rgba(52,211,153,0.12)', accentBorder: 'rgba(52,211,153,0.22)', accentIcon: '#10b981', textColor: 'text-emerald-700 dark:text-emerald-300', iconD: 'M12 20V10M18 20V4M6 20v-4' },
+            { label: 'Net Worth',   value: netWorth.netWorth,                                                     accentBg: 'rgba(52,211,153,0.12)', accentBorder: 'rgba(52,211,153,0.22)', accentIcon: '#10b981', textColor: 'text-emerald-700 dark:text-emerald-300', iconD: 'M12 20V10M18 20V4M6 20v-4' },
           ].map(({ label, value, accentBg, accentBorder, accentIcon, textColor, iconD }) => (
             <div key={label} className="glass-card hover-lift px-4 py-3.5">
               <div className="flex items-center justify-between mb-2">

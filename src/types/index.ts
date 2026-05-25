@@ -59,7 +59,7 @@ export interface SavingsGoal {
 
 // ---- Connected accounts ----
 
-export type AccountType = 'Checking' | 'Savings' | 'Credit Card' | 'Brokerage' | 'Retirement'
+export type AccountType = 'Checking' | 'Savings' | 'Credit Card' | 'Brokerage' | 'Retirement' | 'Investment' | 'Loan' | 'Debt'
 export type AccountStatus = 'connected' | 'syncing' | 'error'
 
 export interface ConnectedAccount {
@@ -123,7 +123,10 @@ export interface MonthlyChartPoint {
 
 export interface NetWorthSummary {
   cash: number
+  // Canonical investment value. Uses holdings market value when holdings exist,
+  // otherwise falls back to investment account balances.
   investments: number
+  // Positive debt number, even when the source account balance is negative.
   creditCardDebt: number
   netWorth: number
 }

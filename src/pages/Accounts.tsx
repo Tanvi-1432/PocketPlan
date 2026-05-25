@@ -1,7 +1,8 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useAccountsStore } from '../store/accounts'
 import { useTransactionsStore } from '../store/transactions'
-import { getNetWorth } from '../utils/investments'
+import { useInvestmentsStore } from '../store/investments'
+import { calculateNetWorth, validateFinancialTotals } from '../utils/financialTotals'
 import { formatCurrency } from '../utils'
 import AccountCard from '../components/accounts/AccountCard'
 import SyncButton from '../components/accounts/SyncButton'
@@ -26,17 +27,22 @@ const NET_WORTH_CARDS = [
  *
  * Responsibilities:
  * - Display simulated connected accounts grouped by account type.
- * - Derive net-worth cards from account balances.
+ * - Derive net-worth cards from the shared financial totals utility.
  * - Count synced transactions per account to show relationship depth.
  */
 export default function Accounts() {
   const { accounts, isSyncing } = useAccountsStore()
+  const { holdings } = useInvestmentsStore()
   const { transactions } = useTransactionsStore()
 
-  const netWorth           = useMemo(() => getNetWorth(accounts), [accounts])
+  const netWorth           = useMemo(() => calculateNetWorth(accounts, holdings), [accounts, holdings])
   const checkingAccounts   = useMemo(() => accounts.filter((a) => a.accountType === 'Checking' || a.accountType === 'Savings'), [accounts])
-  const creditAccounts     = useMemo(() => accounts.filter((a) => a.accountType === 'Credit Card'), [accounts])
-  const investmentAccounts = useMemo(() => accounts.filter((a) => a.accountType === 'Brokerage' || a.accountType === 'Retirement'), [accounts])
+  const creditAccounts     = useMemo(() => accounts.filter((a) => a.accountType === 'Credit Card' || a.accountType === 'Loan' || a.accountType === 'Debt'), [accounts])
+  const investmentAccounts = useMemo(() => accounts.filter((a) => a.accountType === 'Brokerage' || a.accountType === 'Retirement' || a.accountType === 'Investment'), [accounts])
+
+  useEffect(() => {
+    validateFinancialTotals({ accounts, holdings })
+  }, [accounts, holdings])
 
   const txCountByAccount = useMemo(() => {
     // Transactions reference accounts by accountId. Building a map keeps

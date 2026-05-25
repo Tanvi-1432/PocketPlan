@@ -28,7 +28,7 @@ export default function AccountCard({ account, transactionCount }: AccountCardPr
   const { institutionName, accountName, accountType, balance, status, lastSynced } = account
   const badge = STATUS_BADGE[status]
   const avatarColor = INSTITUTION_COLORS[institutionName] ?? 'bg-slate-500'
-  const isCredit = accountType === 'Credit Card'
+  const isDebt = accountType === 'Credit Card' || accountType === 'Loan' || accountType === 'Debt'
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
@@ -52,8 +52,8 @@ export default function AccountCard({ account, transactionCount }: AccountCardPr
       <div className="flex items-end justify-between">
         <div>
           <p className="text-xs text-slate-400 dark:text-slate-500 mb-0.5">{accountType}</p>
-          <p className={`text-xl font-bold ${isCredit && balance < 0 ? 'text-red-600 dark:text-red-400' : 'text-slate-900 dark:text-slate-100'}`}>
-            {isCredit && balance < 0 ? `-${formatCurrency(Math.abs(balance))}` : formatCurrency(balance)}
+          <p className={`text-xl font-bold ${isDebt && balance < 0 ? 'text-red-600 dark:text-red-400' : 'text-slate-900 dark:text-slate-100'}`}>
+            {isDebt && balance < 0 ? `-${formatCurrency(Math.abs(balance))}` : formatCurrency(balance)}
           </p>
         </div>
         <div className="text-right">

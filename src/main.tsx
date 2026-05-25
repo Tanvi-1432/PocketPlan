@@ -53,6 +53,39 @@ initTheme()
   localStorage.setItem(MIGRATION_KEY, '1')
 })()
 
+// v3: align persisted demo brokerage account balances with demo holdings.
+// Older localStorage could keep the previous account-only investment total,
+// which made Accounts disagree with Dashboard/Investments after holdings loaded.
+;(function migrateDemoInvestmentBalances() {
+  const MIGRATION_KEY = 'pocketplan-migration-v3-investment-balances'
+  if (localStorage.getItem(MIGRATION_KEY)) return
+
+  try {
+    const key = 'pocketplan-accounts'
+    const raw = localStorage.getItem(key)
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      const accounts = parsed?.state?.accounts
+      if (Array.isArray(accounts)) {
+        const nextAccounts = accounts.map((account: { id?: string; balance?: number }) => {
+          if (account.id === 'demo-acc-fid-brok') return { ...account, balance: 22321.26 }
+          if (account.id === 'demo-acc-rh-brok') return { ...account, balance: 16141.16 }
+          return account
+        })
+        localStorage.setItem(key, JSON.stringify({
+          ...parsed,
+          state: { ...parsed.state, accounts: nextAccounts },
+        }))
+      }
+    }
+  } catch {
+    // If persisted account data is malformed, leave it alone; the app can still
+    // be reset from Settings/Dashboard.
+  }
+
+  localStorage.setItem(MIGRATION_KEY, '1')
+})()
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />

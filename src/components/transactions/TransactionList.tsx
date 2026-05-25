@@ -1,5 +1,6 @@
-import { useState, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Transaction } from "../../types";
+import { useInfiniteScroll } from "../../hooks";
 import { toMonthKey } from "../../utils";
 import type { TransactionFilters } from "./TransactionFilters";
 import TransactionFiltersBar from "./TransactionFilters";
@@ -55,6 +56,9 @@ const DEFAULT_FILTERS: TransactionFilters = {
   category: "all",
 };
 
+const INITIAL_VISIBLE_COUNT = 30;
+const LOAD_MORE_COUNT = 30;
+
 export default function TransactionList({
   transactions,
   onEdit,
@@ -75,14 +79,21 @@ export default function TransactionList({
   const [localSearch, setLocalSearch] = useState(persistedSearch);
   const [localFilters, setLocalFilters] =
     useState<TransactionFilters>(persistedFilters);
+  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const loadingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   function handleSearchChange(s: string) {
     setLocalSearch(s);
+    setVisibleCount(INITIAL_VISIBLE_COUNT);
+    setIsLoadingMore(false);
     onSearchChange?.(s);
   }
 
   function handleFiltersChange(f: TransactionFilters) {
     setLocalFilters(f);
+    setVisibleCount(INITIAL_VISIBLE_COUNT);
+    setIsLoadingMore(false);
     onFiltersChange?.(f);
   }
 
@@ -95,6 +106,33 @@ export default function TransactionList({
     () => [...filtered].sort((a, b) => b.date.localeCompare(a.date)),
     [filtered]
   );
+  const visibleTransactions = useMemo(
+    () => sorted.slice(0, visibleCount),
+    [sorted, visibleCount]
+  );
+
+  const hasMore = visibleCount < sorted.length;
+
+  const loadMore = useCallback(() => {
+    if (loadingTimer.current) clearTimeout(loadingTimer.current);
+    setIsLoadingMore(true);
+    setVisibleCount((count) =>
+      Math.min(count + LOAD_MORE_COUNT, sorted.length)
+    );
+    loadingTimer.current = setTimeout(() => setIsLoadingMore(false), 250);
+  }, [sorted.length]);
+
+  useEffect(() => {
+    return () => {
+      if (loadingTimer.current) clearTimeout(loadingTimer.current);
+    };
+  }, []);
+
+  const loadMoreRef = useInfiniteScroll({
+    hasMore,
+    onLoadMore: loadMore,
+    rootMargin: "360px 0px 520px 0px",
+  });
 
   return (
     <div className="flex flex-col gap-4">
@@ -174,7 +212,7 @@ export default function TransactionList({
           className="glass-card overflow-hidden divide-y divide-slate-100/70 dark:divide-white/5"
           style={{ borderRadius: "1rem", padding: 0 }}
         >
-          {sorted.map((t) => (
+          {visibleTransactions.map((t) => (
             <TransactionItem
               key={t.id}
               transaction={t}
@@ -187,9 +225,33 @@ export default function TransactionList({
       )}
 
       {sorted.length > 0 && (
-        <p className="text-xs text-slate-400 dark:text-slate-500 text-right">
-          {sorted.length} transaction{sorted.length !== 1 ? "s" : ""}
-        </p>
+        <div className="flex flex-col items-center gap-2 pb-[calc(2rem+var(--safe-bottom,0px))]">
+          <p className="text-xs text-slate-400 dark:text-slate-500 text-center">
+            Showing {visibleTransactions.length} of {sorted.length} transaction{sorted.length !== 1 ? "s" : ""}
+          </p>
+
+          {hasMore ? (
+            <>
+              <div ref={loadMoreRef} className="h-8 w-full" aria-hidden="true" />
+              <button
+                type="button"
+                onClick={loadMore}
+                className="rounded-xl px-3 py-1.5 text-xs font-medium text-violet-600 dark:text-violet-400 bg-violet-50/70 dark:bg-violet-950/30 border border-violet-100 dark:border-violet-900/50 hover:bg-violet-100/80 dark:hover:bg-violet-900/40 transition-colors"
+              >
+                Load more
+              </button>
+              {isLoadingMore && (
+                <p className="text-xs text-slate-400 dark:text-slate-500">
+                  Loading more transactions...
+                </p>
+              )}
+            </>
+          ) : (
+            <p className="text-xs text-slate-400 dark:text-slate-500">
+              You've reached the end
+            </p>
+          )}
+        </div>
       )}
     </div>
   );

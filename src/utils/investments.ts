@@ -1,10 +1,10 @@
-import type { InvestmentHolding, ConnectedAccount, NetWorthSummary, ChartDataPoint } from '../types'
+import type { InvestmentHolding, ChartDataPoint } from '../types'
 
 /**
  * Investment and net-worth calculations.
  *
- * Holdings supply portfolio math. Connected accounts supply cash/debt account
- * balances. Pages compose both when showing total net worth.
+ * Holdings supply portfolio math. App-wide net worth lives in
+ * `financialTotals.ts` so every page uses the same source-of-truth formula.
  */
 
 export function getTotalPortfolioValue(holdings: InvestmentHolding[]): number {
@@ -40,24 +40,4 @@ export function getHoldingsByAccount(
   accountId: string
 ): InvestmentHolding[] {
   return holdings.filter((h) => h.accountId === accountId)
-}
-
-export function getNetWorth(accounts: ConnectedAccount[]): NetWorthSummary {
-  let cash = 0
-  let investments = 0
-  let creditCardDebt = 0
-
-  for (const acc of accounts) {
-    // Credit card balances are stored as negative account balances. Net worth
-    // displays debt as a positive number and subtracts it at the end.
-    if (acc.accountType === 'Checking' || acc.accountType === 'Savings') {
-      cash += acc.balance
-    } else if (acc.accountType === 'Brokerage' || acc.accountType === 'Retirement') {
-      investments += acc.balance
-    } else if (acc.accountType === 'Credit Card') {
-      creditCardDebt += Math.abs(acc.balance)
-    }
-  }
-
-  return { cash, investments, creditCardDebt, netWorth: cash + investments - creditCardDebt }
 }
