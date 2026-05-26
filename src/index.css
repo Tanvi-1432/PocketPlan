@@ -53,13 +53,13 @@
   --glow-pink:     rgba(236, 72,  153, 0.12);
   --glow-mint:     rgba(16,  185, 129, 0.10);
 
-  --glass-bg:        rgba(15, 23, 42, 0.52);
-  --glass-border:    rgba(255, 255, 255, 0.09);
+  --glass-bg:        rgba(15, 23, 42, 0.65);
+  --glass-border:    rgba(255, 255, 255, 0.11);
   --glass-blur:      24px;
   --glass-shadow:    0 8px 32px rgba(0, 0, 0, 0.28), 0 2px 8px rgba(0,0,0,0.18);
 
-  --card-bg:         rgba(15, 23, 42, 0.56);
-  --card-border:     rgba(255, 255, 255, 0.07);
+  --card-bg:         rgba(15, 23, 42, 0.72);
+  --card-border:     rgba(255, 255, 255, 0.10);
   --card-shadow:     0 4px 24px rgba(0, 0, 0, 0.22), 0 1px 4px rgba(0,0,0,0.14);
 
   --sidebar-bg:      rgba(10, 15, 30, 0.82);

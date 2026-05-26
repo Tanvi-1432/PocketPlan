@@ -2,18 +2,33 @@ import type { Transaction } from "../../types";
 import { formatCurrency, formatDate } from "../../utils";
 import { Button, MerchantAvatar } from "../ui";
 
-/**
- * Single transaction row.
- *
- * The whole row opens the detail modal. Edit/delete controls stop propagation so
- * clicking them does not also open details.
- */
-
 interface TransactionItemProps {
   transaction: Transaction;
   onEdit: (t: Transaction) => void;
   onDelete: (id: string) => void;
   onViewDetail: (t: Transaction) => void;
+}
+
+function EditIcon() {
+  return (
+    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+      <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+    </svg>
+  )
+}
+
+function TrashIcon() {
+  return (
+    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="3 6 5 6 21 6" />
+      <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+      <path d="M10 11v6M14 11v6" />
+      <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
+    </svg>
+  )
 }
 
 export default function TransactionItem({
@@ -22,28 +37,16 @@ export default function TransactionItem({
   onDelete,
   onViewDetail,
 }: TransactionItemProps) {
-  const {
-    id,
-    title,
-    amount,
-    type,
-    category,
-    date,
-    source,
-    isRecurring,
-    autoCategorized,
-    categoryOverridden,
-  } = transaction;
+  const { id, title, amount, type, category, date, source, isRecurring, autoCategorized, categoryOverridden } = transaction;
   const isIncome = type === "income";
 
   return (
     <div
-      className="flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group cursor-pointer"
+      className="flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group cursor-pointer"
       onClick={() => onViewDetail(transaction)}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
-        // Keyboard support mirrors click behavior for accessible row details.
         if (e.key === "Enter" || e.key === " ") onViewDetail(transaction);
       }}
       aria-label={`View details for ${title}`}
@@ -88,7 +91,7 @@ export default function TransactionItem({
       </span>
 
       <div
-        className="hidden sm:flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+        className="hidden sm:flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150 shrink-0"
         onClick={(e) => e.stopPropagation()}
       >
         <Button
@@ -98,7 +101,7 @@ export default function TransactionItem({
           aria-label="Edit transaction"
           className="min-w-[32px] min-h-[32px]"
         >
-          ✎
+          <EditIcon />
         </Button>
         <Button
           variant="ghost"
@@ -107,7 +110,7 @@ export default function TransactionItem({
           className="hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 min-w-[32px] min-h-[32px]"
           aria-label="Delete transaction"
         >
-          ✕
+          <TrashIcon />
         </Button>
       </div>
     </div>

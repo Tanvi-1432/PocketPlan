@@ -293,9 +293,9 @@ export default function Settings() {
       </GlassSection>
 
       {/* ── Demo data ─────────────────────────────────────────────────── */}
-      <GlassSection title="Demo Data" icon="M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7M4 7l8-4 8 4M4 7h16">
-        <Row label="Load demo experience" sub="12 months of realistic simulated financial data">
-          <Button size="sm" variant="secondary" onClick={loadDemoData}>Load demo</Button>
+      <GlassSection title="Sample Data" icon="M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7M4 7l8-4 8 4M4 7h16">
+        <Row label="Load sample experience" sub="12 months of realistic financial data">
+          <Button size="sm" variant="secondary" onClick={loadDemoData}>Load data</Button>
         </Row>
         <Row label="Reset all data" sub="Removes all transactions, budgets, goals, and accounts">
           <Button size="sm" variant="danger" onClick={clearDemoData}>Reset</Button>
@@ -344,7 +344,7 @@ export default function Settings() {
 
       {/* ── About ─────────────────────────────────────────────────────── */}
       <GlassSection title="About" icon="M12 22a10 10 0 100-20 10 10 0 000 20zm0-14v4m0 4h.01">
-        <Row label="PocketPlan" sub="Personal finance demo — all data stored locally">
+        <Row label="PocketPlan" sub="All data is stored locally in your browser">
           <span className="text-xs text-slate-400 dark:text-slate-500 font-mono">v2.1</span>
         </Row>
         <Row label="Reset preferences" sub="Restore all formatting settings to defaults">

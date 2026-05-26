@@ -14,9 +14,9 @@ const INSTITUTION_COLORS: Record<string, string> = {
 }
 
 const STATUS_BADGE: Record<ConnectedAccount['status'], { label: string; className: string }> = {
-  connected: { label: 'Connected', className: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400' },
-  syncing:   { label: 'Syncing…',  className: 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-400 animate-pulse' },
-  error:     { label: 'Error',     className: 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-400' },
+  connected: { label: 'Connected', className: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400' },
+  syncing:   { label: 'Syncing…',  className: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400 animate-pulse' },
+  error:     { label: 'Error',     className: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400' },
 }
 
 function formatLastSynced(iso: string | null): string {
@@ -31,10 +31,10 @@ export default function AccountCard({ account, transactionCount }: AccountCardPr
   const isDebt = accountType === 'Credit Card' || accountType === 'Loan' || accountType === 'Debt'
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+    <div className="glass-card hover-lift p-5">
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className={`${avatarColor} w-9 h-9 rounded-lg flex items-center justify-center shrink-0`}>
+          <div className={`${avatarColor} w-9 h-9 rounded-xl flex items-center justify-center shrink-0`}>
             <span className="text-white text-xs font-bold">
               {institutionName.slice(0, 2).toUpperCase()}
             </span>
@@ -44,7 +44,7 @@ export default function AccountCard({ account, transactionCount }: AccountCardPr
             <p className="text-xs text-slate-500 dark:text-slate-400">{accountName}</p>
           </div>
         </div>
-        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${badge.className}`}>
+        <span className={`text-xs font-medium px-2 py-0.5 rounded-full shrink-0 ${badge.className}`}>
           {badge.label}
         </span>
       </div>
@@ -52,7 +52,7 @@ export default function AccountCard({ account, transactionCount }: AccountCardPr
       <div className="flex items-end justify-between">
         <div>
           <p className="text-xs text-slate-400 dark:text-slate-500 mb-0.5">{accountType}</p>
-          <p className={`text-xl font-bold ${isDebt && balance < 0 ? 'text-red-600 dark:text-red-400' : 'text-slate-900 dark:text-slate-100'}`}>
+          <p className={`text-xl font-bold number-display ${isDebt && balance < 0 ? 'text-red-600 dark:text-red-400' : 'text-slate-900 dark:text-slate-100'}`}>
             {isDebt && balance < 0 ? `-${formatCurrency(Math.abs(balance))}` : formatCurrency(balance)}
           </p>
         </div>
@@ -60,7 +60,7 @@ export default function AccountCard({ account, transactionCount }: AccountCardPr
           <p className="text-xs text-slate-400 dark:text-slate-500">{formatLastSynced(lastSynced)}</p>
           {transactionCount !== undefined && (
             <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-              {transactionCount} synced transaction{transactionCount !== 1 ? 's' : ''}
+              {transactionCount} transaction{transactionCount !== 1 ? 's' : ''}
             </p>
           )}
         </div>

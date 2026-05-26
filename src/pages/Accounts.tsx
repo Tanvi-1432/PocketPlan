@@ -59,14 +59,9 @@ export default function Accounts() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Connected Accounts</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Simulated financial account sync</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Bank and investment accounts</p>
         </div>
         <SyncButton />
-      </div>
-
-      <div className="flex items-center gap-2 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-lg px-4 py-2.5 text-sm text-amber-800 dark:text-amber-300">
-        <span className="shrink-0">⚠</span>
-        <span><strong>Demo Mode:</strong> Simulated data only. No real bank credentials are used.</span>
       </div>
 
       {accounts.length === 0 && !isSyncing && (
@@ -78,7 +73,7 @@ export default function Accounts() {
           </div>
           <p className="text-base font-semibold text-slate-700 dark:text-slate-300">No accounts connected</p>
           <p className="text-sm text-slate-400 dark:text-slate-500 mt-1 max-w-xs">
-            Click "Simulate Account Sync" to load demo bank and investment account data.
+            Connect your bank and investment accounts to see your full financial picture.
           </p>
         </div>
       )}
@@ -86,12 +81,12 @@ export default function Accounts() {
       {accounts.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {NET_WORTH_CARDS.map(({ label, key, color, iconColor, icon }) => (
-            <div key={label} className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm px-4 py-3 hover:shadow-md transition-shadow duration-200">
+            <div key={label} className="glass-card hover-lift px-4 py-3.5">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs text-slate-500 dark:text-slate-400">{label}</p>
-                <div className={`w-6 h-6 rounded-md flex items-center justify-center ${iconColor}`}>{icon}</div>
+                <div className={`w-6 h-6 rounded-xl flex items-center justify-center shrink-0 ${iconColor}`}>{icon}</div>
               </div>
-              <p className={`text-lg font-bold ${color}`}>{formatCurrency(netWorth[key])}</p>
+              <p className={`text-base font-bold number-display ${color}`}>{formatCurrency(netWorth[key])}</p>
             </div>
           ))}
         </div>

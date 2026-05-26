@@ -55,7 +55,8 @@ export default function CategoryChart({ data }: CategoryChartProps) {
       <CardHeader title="Spending by category" />
       <CardBody>
         <div className="flex flex-col sm:flex-row items-center gap-4">
-          <ResponsiveContainer width={180} height={180}>
+          <div className="w-full sm:w-[180px] shrink-0 h-[180px]">
+          <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
                 data={top}
@@ -75,6 +76,7 @@ export default function CategoryChart({ data }: CategoryChartProps) {
               <Tooltip content={<CustomTooltip />} />
             </PieChart>
           </ResponsiveContainer>
+          </div>
           <div className="flex-1 w-full space-y-2.5">
             {top.map((entry) => {
               const total = top.reduce((s, e) => s + e.total, 0)

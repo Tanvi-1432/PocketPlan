@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import type { Page } from '../components/Layout'
+import { useNavigate } from 'react-router-dom'
 import { useTransactionsStore } from '../store/transactions'
 import { useBudgetsStore } from '../store/budgets'
 import { useAccountsStore } from '../store/accounts'
@@ -29,21 +29,7 @@ import CategoryChart from '../components/dashboard/CategoryChart'
 import MonthlyChart from '../components/dashboard/MonthlyChart'
 import RecentTransactions from '../components/dashboard/RecentTransactions'
 import BudgetProgressList from '../components/dashboard/BudgetProgressList'
-import { Button, Modal } from '../components/ui'
-
-interface DashboardProps {
-  onNavigate: (page: Page) => void
-}
-
-/**
- * Dashboard page for PocketPlan.
- *
- * Responsibilities:
- * - Show the current month financial snapshot.
- * - Compose transactions, budgets, accounts, and holdings into net worth.
- * - Render chart-ready derived data and short insights.
- * - Own the first-run/demo-data onboarding prompt.
- */
+import { Button } from '../components/ui'
 
 const INSIGHT_COLORS = {
   positive: {
@@ -74,27 +60,20 @@ const INSIGHT_COLORS = {
 
 const DISMISSED_KEY = 'pocketplan-onboarding-dismissed'
 
-export default function Dashboard({ onNavigate }: DashboardProps) {
-  // The dashboard is a read-heavy composition layer. Stores provide persisted
-  // raw data; utilities below turn that data into UI-ready summaries.
+export default function Dashboard() {
+  const navigate = useNavigate()
   const { transactions } = useTransactionsStore()
   const { budgets } = useBudgetsStore()
   const { accounts } = useAccountsStore()
   const { holdings } = useInvestmentsStore()
-  const { hasData, loadDemoData, clearDemoData } = useDemoData()
+  const { hasData, loadDemoData } = useDemoData()
 
-  const [confirmResetOpen, setConfirmResetOpen] = useState(false)
   const [onboardingDismissed, setOnboardingDismissed] = useState(
     () => localStorage.getItem(DISMISSED_KEY) === 'true'
   )
 
   const monthKey = currentMonthKey()
 
-  // ====================
-  // Derived Financial Data
-  // ====================
-  // Memoization keeps chart arrays and summary calculations stable between
-  // renders unless their source store data changes.
   const monthlyTransactions = useMemo(() => filterByMonth(transactions, monthKey), [transactions, monthKey])
   const income    = useMemo(() => calculateMonthlyIncome(transactions, monthKey),   [transactions, monthKey])
   const expenses  = useMemo(() => calculateMonthlyExpenses(transactions, monthKey), [transactions, monthKey])
@@ -112,8 +91,6 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
     validateFinancialTotals({ accounts, holdings })
   }, [accounts, holdings])
 
-  // Find the latest sync timestamp across all connected demo accounts so the
-  // hero can show one concise "last synced" label.
   const lastSynced = accounts.length > 0
     ? accounts.reduce<string | null>((latest, a) => {
         if (!a.lastSynced) return latest
@@ -123,8 +100,6 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
     : null
 
   function handleDismissOnboarding() {
-    // Persist dismissal outside Zustand because onboarding is local UI state,
-    // not financial data.
     localStorage.setItem(DISMISSED_KEY, 'true')
     setOnboardingDismissed(true)
   }
@@ -135,8 +110,6 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
   }
 
   const showOnboarding = !hasData && !onboardingDismissed
-
-  // Forecast status controls the color treatment of month-end projection.
   const forecastIsPositive = forecast.projectedBalance >= 1000
   const forecastIsWarn     = forecast.projectedBalance >= 0 && forecast.projectedBalance < 1000
 
@@ -163,7 +136,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
             <div className="flex-1">
               <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Welcome to PocketPlan</h2>
               <p className="text-sm text-slate-600 dark:text-slate-300 mt-1 max-w-lg">
-                Explore a premium personal finance dashboard with budgets, transactions, accounts, and investments.
+                A personal finance dashboard with budgets, transactions, accounts, and investments.
               </p>
               <div className="flex flex-wrap gap-3 mt-4">
                 <button
@@ -201,46 +174,38 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
 
           {/* Decorative orb */}
           <div className="absolute top-0 right-0 w-56 h-56 rounded-full pointer-events-none"
-            style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.16) 0%, transparent 70%)', transform: 'translate(25%, -25%)' }} />
+            style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.10) 0%, transparent 70%)', transform: 'translate(25%, -25%)' }} />
 
           {/* Header row */}
-          <div className="relative flex items-start justify-between mb-5">
-            <div>
-              <p className="text-xs font-medium tracking-widest uppercase mb-2 text-violet-600 dark:text-violet-300">
-                {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                {lastSynced && (
-                  <span className="hidden sm:inline text-violet-400 dark:text-violet-400">
-                    {' '}· Synced {new Date(lastSynced).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
-                  </span>
-                )}
-              </p>
-              <h1 className="text-3xl sm:text-4xl font-bold number-display text-violet-900 dark:text-white"
-                style={{ letterSpacing: '-0.03em' }}>
-                {formatCurrency(netWorth.netWorth)}
-              </h1>
-              <p className="text-sm mt-1 text-violet-500 dark:text-violet-300">Net worth</p>
-            </div>
-            <button
-              onClick={() => setConfirmResetOpen(true)}
-              className="text-xs shrink-0 mt-1 underline underline-offset-2 text-violet-400 dark:text-violet-400 hover:text-violet-600 dark:hover:text-violet-200 transition-colors"
-            >
-              Reset
-            </button>
+          <div className="relative mb-5">
+            <p className="text-xs font-medium tracking-widest uppercase mb-2 text-violet-600 dark:text-violet-300">
+              {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+              {lastSynced && (
+                <span className="hidden sm:inline text-violet-400 dark:text-violet-400">
+                  {' '}· Synced {new Date(lastSynced).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                </span>
+              )}
+            </p>
+            <h1 className="text-3xl sm:text-4xl font-bold number-display text-violet-900 dark:text-white"
+              style={{ letterSpacing: '-0.03em' }}>
+              {formatCurrency(netWorth.netWorth)}
+            </h1>
+            <p className="text-sm mt-1 text-violet-500 dark:text-violet-300">Net worth</p>
           </div>
 
-          {/* Metric pills */}
+          {/* Metric pills — min-w-0 + break-all prevents financial value truncation */}
           <div className="relative grid grid-cols-3 gap-2 sm:gap-3">
             {[
               { label: 'Income',   value: income,   cls: 'text-emerald-700 dark:text-emerald-300' },
               { label: 'Expenses', value: expenses, cls: 'text-rose-700 dark:text-rose-300'       },
               { label: 'Balance',  value: balance,  cls: 'text-violet-900 dark:text-white'         },
             ].map(({ label, value, cls }) => (
-              <div key={label} className="rounded-2xl px-3 py-3 sm:px-4 sm:py-3.5"
+              <div key={label} className="rounded-2xl px-3 py-3 sm:px-4 sm:py-3.5 min-w-0"
                 style={{ background: 'rgba(255,255,255,0.28)', border: '1px solid rgba(255,255,255,0.45)' }}>
-                <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider mb-1.5 text-violet-500 dark:text-violet-300">
+                <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider mb-1.5 text-violet-500 dark:text-violet-300">
                   {label}
                 </p>
-                <p className={`text-sm sm:text-lg font-bold number-display truncate ${cls}`}>
+                <p className={`text-sm sm:text-base font-bold number-display leading-tight break-all ${cls}`}>
                   {value < 0 ? `-${formatCurrency(Math.abs(value))}` : formatCurrency(value)}
                 </p>
               </div>
@@ -275,7 +240,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
         </div>
       )}
 
-      {/* Fallback page title */}
+      {/* Fallback page title when no data */}
       {!hasData && (
         <div>
           <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Dashboard</h1>
@@ -289,10 +254,10 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
       {accounts.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 animate-slide-up">
           {[
-            { label: 'Cash',        value: netWorth.cash,                                                          accentBg: 'rgba(148,163,184,0.12)', accentBorder: 'rgba(148,163,184,0.22)', accentIcon: '#94a3b8', textColor: 'text-slate-700 dark:text-slate-200', iconD: 'M3 9a2 2 0 012-2h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9zm0 0V7a2 2 0 012-2h2M16 5H8a2 2 0 00-2 2' },
-            { label: 'Investments', value: netWorth.investments,                                                  accentBg: 'rgba(129,140,248,0.14)', accentBorder: 'rgba(129,140,248,0.25)', accentIcon: '#6366f1', textColor: 'text-indigo-700 dark:text-indigo-300', iconD: 'M3 17l4-8 4 4 4-6 4 3' },
-            { label: 'Credit Debt', value: netWorth.creditCardDebt,                                               accentBg: 'rgba(251,113,133,0.12)', accentBorder: 'rgba(251,113,133,0.22)', accentIcon: '#f43f5e', textColor: 'text-rose-600 dark:text-rose-400',   iconD: 'M1 6h22v13a2 2 0 01-2 2H3a2 2 0 01-2-2V6zm0 5h22' },
-            { label: 'Net Worth',   value: netWorth.netWorth,                                                     accentBg: 'rgba(52,211,153,0.12)', accentBorder: 'rgba(52,211,153,0.22)', accentIcon: '#10b981', textColor: 'text-emerald-700 dark:text-emerald-300', iconD: 'M12 20V10M18 20V4M6 20v-4' },
+            { label: 'Cash',        value: netWorth.cash,           accentBg: 'rgba(148,163,184,0.12)', accentBorder: 'rgba(148,163,184,0.22)', accentIcon: '#94a3b8', textColor: 'text-slate-700 dark:text-slate-200',       iconD: 'M3 9a2 2 0 012-2h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9zm0 0V7a2 2 0 012-2h2M16 5H8a2 2 0 00-2 2' },
+            { label: 'Investments', value: netWorth.investments,    accentBg: 'rgba(129,140,248,0.14)', accentBorder: 'rgba(129,140,248,0.25)', accentIcon: '#6366f1', textColor: 'text-indigo-700 dark:text-indigo-300',    iconD: 'M3 17l4-8 4 4 4-6 4 3' },
+            { label: 'Credit Debt', value: netWorth.creditCardDebt, accentBg: 'rgba(251,113,133,0.12)', accentBorder: 'rgba(251,113,133,0.22)', accentIcon: '#f43f5e', textColor: 'text-rose-600 dark:text-rose-400',         iconD: 'M1 6h22v13a2 2 0 01-2 2H3a2 2 0 01-2-2V6zm0 5h22' },
+            { label: 'Net Worth',   value: netWorth.netWorth,       accentBg: 'rgba(52,211,153,0.12)',  accentBorder: 'rgba(52,211,153,0.22)',  accentIcon: '#10b981', textColor: 'text-emerald-700 dark:text-emerald-300', iconD: 'M12 20V10M18 20V4M6 20v-4' },
           ].map(({ label, value, accentBg, accentBorder, accentIcon, textColor, iconD }) => (
             <div key={label} className="glass-card hover-lift px-4 py-3.5">
               <div className="flex items-center justify-between mb-2">
@@ -310,7 +275,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
         </div>
       )}
 
-      {/* Monthly summary cards (only when no hero) */}
+      {/* Monthly summary cards (no-data fallback) */}
       {!hasData && (
         <div className="grid grid-cols-3 gap-3 sm:gap-4">
           <SummaryCard label="Income" amount={income} variant="income" />
@@ -319,12 +284,20 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
         </div>
       )}
 
+      {/* ── Recent activity (actionable — above charts) ───────────────── */}
+      {hasData && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-slide-up stagger-1">
+          <RecentTransactions transactions={recentTransactions} onViewAll={() => navigate('/transactions')} />
+          <BudgetProgressList items={budgetProgress} onViewAll={() => navigate('/budgets')} />
+        </div>
+      )}
+
       {/* ── Month-over-month ──────────────────────────────────────────── */}
       {comparisons.length > 0 && (
-        <section className="animate-slide-up stagger-1">
+        <section className="animate-slide-up stagger-2">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Spending vs Last Month</h2>
-            <button onClick={() => onNavigate('analytics')} className="text-xs text-violet-500 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
+            <button onClick={() => navigate('/analytics')} className="text-xs text-violet-500 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
               Full analytics →
             </button>
           </div>
@@ -357,7 +330,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                 <div key={insight.id}
                   className={`flex items-start gap-3 rounded-2xl px-4 py-3 ${c.text}`}
                   style={{ background: c.bg, border: `1px solid ${c.border}` }}>
-                  <span className="mt-1.5 w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: c.dot }} />
+                  <span className="mt-1.5 w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: c.dot }} />
                   <p className="text-sm">{insight.text}</p>
                 </div>
               )
@@ -372,26 +345,6 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
         <MonthlyChart data={monthlyChartData} />
       </div>
 
-      {/* ── Recent activity ───────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-slide-up stagger-4">
-        <RecentTransactions transactions={recentTransactions} onViewAll={() => onNavigate('transactions')} />
-        <BudgetProgressList items={budgetProgress} onViewAll={() => onNavigate('budgets')} />
-      </div>
-
-      {/* ── Reset modal ───────────────────────────────────────────────── */}
-      <Modal isOpen={confirmResetOpen} onClose={() => setConfirmResetOpen(false)} title="Reset demo data?">
-        <div className="flex flex-col gap-5">
-          <p className="text-sm text-slate-600 dark:text-slate-300">
-            This will remove all demo transactions, budgets, goals, accounts, and investment holdings.
-          </p>
-          <div className="flex gap-3 justify-end">
-            <Button variant="secondary" onClick={() => setConfirmResetOpen(false)}>Cancel</Button>
-            <Button variant="danger" onClick={() => { clearDemoData(); setOnboardingDismissed(false); setConfirmResetOpen(false) }}>
-              Reset demo data
-            </Button>
-          </div>
-        </div>
-      </Modal>
     </div>
   )
 }
